@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="lwXJ5R" name="TransportExample" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginFormats="buildStandalone,buildVST3"
+              pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginVST3Category="Fx,Instrument">
+  <MAINGROUP id="fZovay" name="TransportExample">
+    <GROUP id="{129D21EF-3F97-D802-59A5-B8AE91C5E69A}" name="Source">
+      <GROUP id="{C08C3F86-D22A-BA2C-C3BD-9D425FB8C1BC}" name="Constants">
+        <FILE id="Bdjvqq" name="StringConstants.h" compile="0" resource="0"
+              file="Source/StringConstants.h"/>
+      </GROUP>
+      <GROUP id="{D020E1CD-FE85-0E00-D4B5-8501DBF540A3}" name="Parameters">
+        <FILE id="KIQE3d" name="APVTSWrapper.cpp" compile="1" resource="0"
+              file="Source/APVTSWrapper.cpp"/>
+        <FILE id="H68scF" name="APVTSWrapper.h" compile="0" resource="0" file="Source/APVTSWrapper.h"/>
+        <FILE id="LVjJ6c" name="TransportTree.cpp" compile="1" resource="0"
+              file="Source/TransportTree.cpp"/>
+        <FILE id="tWZn2W" name="TransportTree.h" compile="0" resource="0" file="Source/TransportTree.h"/>
+      </GROUP>
+      <GROUP id="{77CE7882-BC54-2B4A-4FF4-3E4B5791F4C4}" name="Components">
+        <FILE id="K6u8pP" name="UI_Spinner.cpp" compile="1" resource="0" file="Source/UI_Spinner.cpp"/>
+        <FILE id="ptqSsl" name="UI_Spinner.h" compile="0" resource="0" file="Source/UI_Spinner.h"/>
+        <FILE id="xraZKV" name="UI_Transport.cpp" compile="1" resource="0"
+              file="Source/UI_Transport.cpp"/>
+        <FILE id="CDiVx5" name="UI_Transport.h" compile="0" resource="0" file="Source/UI_Transport.h"/>
+      </GROUP>
+      <FILE id="M1RAbr" name="CustomPlayHead.cpp" compile="1" resource="0"
+            file="Source/CustomPlayHead.cpp"/>
+      <FILE id="cgaU42" name="CustomPlayHead.h" compile="0" resource="0"
+            file="Source/CustomPlayHead.h"/>
+      <FILE id="HKPeID" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="jx6lrN" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="IZBfEi" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="L9xQL1" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="TransportExample" enablePluginBinaryCopyStep="1"
+                       vst3BinaryLocation="A:\VST"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="TransportExample"/>
+        <CONFIGURATION isDebug="1" name="Ableton" targetName="TransportExample" enablePluginBinaryCopyStep="1"
+                       vst3BinaryLocation="a:\VST\64\hobwell\"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../Program Files/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../Program Files/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
