@@ -20,6 +20,7 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 	tempoSpinner.setValue(transportWrapper.tempo);
 	addAndMakeVisible(tempoSpinner);
 	// connect the tempo slider to the "tempo" audio parameter
+	// this will adjust the slider's range to match the parameter's range - it's also supposed to bind the UI value to the parameter value, but it doesn't seem to do that for some reason
 	tempoAttachment = transportWrapper.tree.createSliderAttachment(IDS::tempo, tempoSpinner);
 	
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
@@ -81,6 +82,15 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 
 UI_Transport::~UI_Transport() {}
 
+juce::String UI_Transport::getPosition()
+{
+	ppq = transportWrapper.ppq;
+	int bars = (int)ppq / transportWrapper.beat_duration;
+	int beats = (int)ppq % transportWrapper.bar_length;
+	int divisions = (int)(ppq * 4) % 4;
+	return juce::String(bars) + "." + juce::String(beats) + "." + juce::String(divisions);
+}
+
 void UI_Transport::paint(juce::Graphics& g)
 {
 	g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));   // clear the background
@@ -133,7 +143,7 @@ void UI_Transport::tempoSetup(bool hostControls)
 			{
 				// when the spinner value changes, update the tree
 				// this is causing access violation errors
-				transportWrapper.tempo = (int)round(tempoSpinner.getValue()); // need to match the behaviour of the string conversion function, which rounds
+				transportWrapper.tempo = (int)round(tempoSpinner.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
 			};
 		transportWrapper.onTempoChanged = nullptr;
 	}
@@ -142,4 +152,5 @@ void UI_Transport::tempoSetup(bool hostControls)
 void UI_Transport::timerCallback()
 {
 	tempoSpinner.timerCallback();
+	transportPositionLabel.setText(getPosition(), juce::dontSendNotification);
 }

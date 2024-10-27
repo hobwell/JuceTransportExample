@@ -38,7 +38,8 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition() 
 			// if the host provides a value, use it, otherwise fall back to the internal value
 			if (transportWrapper.host_controls_playing && hostInfo.getHostTimeNs().hasValue()) {
 				timeNs = *hostInfo.getHostTimeNs();
-			} else {
+			}
+			else {
 				timeNs = bufferStart * 1e9 / sampleRate; // TODO - update this to accumulate time, rather than calcaulating it from the buffer start
 			}
 
@@ -48,7 +49,8 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition() 
 
 			if (transportWrapper.host_controls_position && hostInfo.getPpqPosition().hasValue()) {
 				ppq = *hostInfo.getPpqPosition();
-			} else {
+			}
+			else {
 				ppq = bufferStart / (samplesPerBeat * beatsPerQuarterNote); // TODO - update this to accumulate time, rather than calcaulating it from the buffer start
 			}
 
@@ -56,7 +58,8 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition() 
 				bufferStart = *hostInfo.getTimeInSamples();
 			}
 			bufferEnd = bufferStart + bufferSize;
-		} else {
+		}
+		else {
 			// advance the position based on the buffer size
 			quarterNotesPerBuffer = bufferSize / (samplesPerBeat * beatsPerQuarterNote);
 			bufferEnd = bufferStart + bufferSize;
@@ -85,79 +88,80 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
 		transportWrapper.rewind_flag = false;
 	}
 
-	// report position info
-	transportWrapper.ppq = bufferStart;
-
 	//if (processor.getPlayHead()->getPosition().hasValue()) { // this always seems to be true, so skip it for now
-		hostInfo = *processor.getPlayHead()->getPosition();
+	hostInfo = *processor.getPlayHead()->getPosition();
 
-		// assumption: all hosts (outside standalone) will provide at least the playing state
-		if (isStandalone) {
-			exPlaying = transportWrapper.playing;
-			transportWrapper.host_controls_playing = false;
-		} else {
-			exPlaying = hostInfo.getIsPlaying();
-			transportWrapper.host_controls_playing = true;
+	// assumption: all hosts (outside standalone) will provide at least the playing state
+	if (isStandalone) {
+		exPlaying = transportWrapper.playing;
+		transportWrapper.host_controls_playing = false;
+	}
+	else {
+		exPlaying = hostInfo.getIsPlaying();
+		transportWrapper.host_controls_playing = true;
+	}
+
+	// check if the playing state has changed
+	if (isPlaying != exPlaying) {
+		isPlaying = !isPlaying;
+		// set the playing state in the transport params
+		transportWrapper.playing = isPlaying;
+		DBG("TParam: " << *transportWrapper.apvts.getRawParameterValue(IDS::playing));
+	}
+
+	// if the host provides a tempo, use it
+	if (hostInfo.getBpm().hasValue()) {
+		exTempo = *hostInfo.getBpm();
+		transportWrapper.host_controls_tempo = true;
+	}
+	else {
+		exTempo = transportWrapper.tempo;
+		transportWrapper.host_controls_tempo = false;
+	}
+
+	// check if the tempo has changed
+	if (bpm != exTempo) {
+		bpm = exTempo;
+		needsUpdate = true;
+		if (transportWrapper.host_controls_tempo) {
+			// set the tempo in the transport params
+			transportWrapper.tempo = exTempo;
 		}
+	};
 
-		// check if the playing state has changed
-		if (isPlaying != exPlaying) {
-			isPlaying = !isPlaying;
-			// set the playing state in the transport params
-			transportWrapper.playing = isPlaying;
-			DBG("TParam: " << *transportWrapper.apvts.getRawParameterValue(IDS::playing));
-		}
+	// check if the host has a time signature
+	if (hostInfo.getTimeSignature().hasValue()) {
+		exTimeSig = *hostInfo.getTimeSignature();
+		transportWrapper.host_controls_time_signature = true;
+	}
+	else {
+		exTimeSig.numerator = transportWrapper.bar_length;
+		exTimeSig.denominator = transportWrapper.beat_duration;
+		transportWrapper.host_controls_time_signature = false;
+	}
 
-		// if the host provides a tempo, use it
-		if (hostInfo.getBpm().hasValue()) {
-			exTempo = *hostInfo.getBpm();
-			transportWrapper.host_controls_tempo = true;
-		} else {
-			exTempo = transportWrapper.tempo;
-			transportWrapper.host_controls_tempo = false;
-		}
+	// check if the time signature has changed
+	if (timeSig.numerator != exTimeSig.numerator || timeSig.denominator != exTimeSig.denominator) {
+		timeSig.numerator = exTimeSig.numerator;
+		timeSig.denominator = exTimeSig.denominator;
+		needsUpdate = true;
+		// set the time signature in the transport params
+		transportWrapper.bar_length = exTimeSig.numerator;
+		transportWrapper.beat_duration = exTimeSig.denominator;
+		DBG("Time Signature: " << timeSig.numerator << "/" << timeSig.denominator);
+	}
 
-		// check if the tempo has changed
-		if (bpm != exTempo) {
-			bpm = exTempo;
-			needsUpdate = true;
-			if (transportWrapper.host_controls_tempo) {
-				// set the tempo in the transport params
-				transportWrapper.tempo = exTempo;
-			}
-		};
+	// check if the host has position info (but only if the host has play control)
+	if (transportWrapper.host_controls_playing && (hostInfo.getPpqPosition().hasValue() || hostInfo.getTimeInSamples().hasValue() || hostInfo.getHostTimeNs().hasValue() || hostInfo.getTimeInSeconds().hasValue())) {
+		transportWrapper.host_controls_position = true;
+	}
+	else {
+		transportWrapper.host_controls_position = false;
+	}
 
-		// check if the host has a time signature
-		if (hostInfo.getTimeSignature().hasValue()) {
-			exTimeSig = *hostInfo.getTimeSignature();
-			transportWrapper.host_controls_time_signature = true;
-		} else {
-			exTimeSig.numerator = transportWrapper.bar_length;
-			exTimeSig.denominator = transportWrapper.beat_duration;
-			transportWrapper.host_controls_time_signature = false;
-		}
-
-		// check if the time signature has changed
-		if (timeSig.numerator != exTimeSig.numerator || timeSig.denominator != exTimeSig.denominator) {
-			timeSig.numerator = exTimeSig.numerator;
-			timeSig.denominator = exTimeSig.denominator;
-			needsUpdate = true;
-			// set the time signature in the transport params
-			transportWrapper.bar_length = exTimeSig.numerator;
-			transportWrapper.beat_duration = exTimeSig.denominator;
-			DBG("Time Signature: " << timeSig.numerator << "/" << timeSig.denominator);
-		}
-
-		// check if the host has position info (but only if the host has play control)
-		if (transportWrapper.host_controls_playing && (hostInfo.getPpqPosition().hasValue() || hostInfo.getTimeInSamples().hasValue() || hostInfo.getHostTimeNs().hasValue() || hostInfo.getTimeInSeconds().hasValue())) {
-			transportWrapper.host_controls_position = true;
-		} else {
-			transportWrapper.host_controls_position = false;
-		}
-
-		if (needsUpdate) {
-			recalculate();
-		}
+	if (needsUpdate) {
+		recalculate();
+	}
 	//}
 
 	return getPosition();
@@ -185,8 +189,9 @@ void CustomPlayHead::updatePosition() const
 	info.setTimeInSeconds(bufferStart / sampleRate);
 	info.setPpqPosition(ppq);
 
-	// after reporting the position, advance the buffer start
+	// after updating the position, advance the buffer start
 	bufferStart = bufferEnd;
 
-	DBG("PPQ: " << ppq);
+	// report the ppq position
+	transportWrapper.ppq = ppq; // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
 }

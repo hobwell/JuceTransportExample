@@ -35,10 +35,13 @@ private:
     static const juce::String rewindIcon;
 
     bool initialized = false;
+    float ppq = 0.f;
     UI_Spinner tempoSpinner{ 0 };
     APVTSWrapper& transportWrapper;
 
     void tempoSetup(bool hostControls);
+
+    juce::String getPosition();
 
     juce::Label transportPositionLabel;
 
