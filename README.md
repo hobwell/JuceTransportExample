@@ -1,0 +1,3 @@
+This project is intended as a basic starting point for a VST that requires a transport and needs to run in a host or as a standalone.
+
+It is a work in progress...
