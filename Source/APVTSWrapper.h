@@ -43,6 +43,7 @@ struct APVTSWrapper : juce::ValueTree::Listener
     std::function<void(float)> onTempoChanged;
 
     APVTSWrapper(TransportTree* transportTree, juce::UndoManager* undoManager);
+    ~APVTSWrapper();
 
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 

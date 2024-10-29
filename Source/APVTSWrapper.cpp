@@ -18,6 +18,11 @@ APVTSWrapper::APVTSWrapper(TransportTree* transportTree, juce::UndoManager* undo
 	apvts.state.addListener(this);
 }
 
+APVTSWrapper::~APVTSWrapper()
+{
+	apvts.state.removeListener(this);
+}
+
 /// <summary>
 /// Respond to changes in the APVTS
 /// </summary>
