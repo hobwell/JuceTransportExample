@@ -23,11 +23,6 @@ struct APVTSWrapper {
     TransportTree& tree;
     juce::UndoManager* undoManager;
 
-    std::atomic<bool> changeForAudio{ false };
-    std::atomic<bool> seenByAudio{ false };
-    std::atomic<bool> changeForUi{ false };
-    std::atomic<bool> seenByUi{ false };
-
     juce::CachedValue<int> bar_length{ apvts.state, IDS::bar_length, undoManager, 4 };
     juce::CachedValue<int> beat_duration{ apvts.state, IDS::beat_duration, undoManager, 4 };
     juce::CachedValue<bool> host_controls_playing{ apvts.state, IDS::host_controls_play, undoManager, false };
