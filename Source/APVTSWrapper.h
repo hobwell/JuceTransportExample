@@ -18,11 +18,15 @@
 /// raise events in response to changes to those parameters.
 /// </summary>
 /// <see href="https://www.classcentral.com/classroom/youtube-vars-values-and-valuetrees-state-management-in-juce-jelle-bakker-adc23-320032">ADC23 - Jelle Bakker: Vars, Values and ValueTrees: Managing State with JUCE</see>
-struct APVTSWrapper : juce::ValueTree::Listener
-{
+struct APVTSWrapper {
     juce::AudioProcessorValueTreeState& apvts;
     TransportTree& tree;
     juce::UndoManager* undoManager;
+
+    std::atomic<bool> changeForAudio{ false };
+    std::atomic<bool> seenByAudio{ false };
+    std::atomic<bool> changeForUi{ false };
+    std::atomic<bool> seenByUi{ false };
 
     juce::CachedValue<int> bar_length{ apvts.state, IDS::bar_length, undoManager, 4 };
     juce::CachedValue<int> beat_duration{ apvts.state, IDS::beat_duration, undoManager, 4 };
@@ -36,16 +40,8 @@ struct APVTSWrapper : juce::ValueTree::Listener
     juce::CachedValue<float> sample_rate{ apvts.state, IDS::sample_rate, undoManager, 384000 };
     juce::CachedValue<float> tempo{ apvts.state, IDS::tempo, undoManager, 120 };
 
-    std::function<void(bool)> onHostControlsPlayingChanged;
-    std::function<void(bool)> onHostControlsPositionChanged;
-    std::function<void(bool)> onHostControlsTempoChanged;
-    std::function<void(bool)> onHostControlsTimeSignatureChanged;
-    std::function<void(float)> onTempoChanged;
-
     APVTSWrapper(TransportTree* transportTree, juce::UndoManager* undoManager);
     ~APVTSWrapper();
-
-    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(APVTSWrapper)

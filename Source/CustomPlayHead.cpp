@@ -194,4 +194,5 @@ void CustomPlayHead::updatePosition() const
 
 	// report the ppq position
 	transportWrapper.ppq = ppq; // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
+
 }

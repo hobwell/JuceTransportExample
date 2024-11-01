@@ -24,11 +24,7 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 	tempoAttachment = transportWrapper.tree.createSliderAttachment(IDS::tempo, tempoSpinner);
 	
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
-	transportWrapper.onHostControlsTempoChanged= [&](bool hostControlsTempo)
-		{
-			tempoSetup(hostControlsTempo);
-		};
-	transportWrapper.onHostControlsTempoChanged(transportWrapper.host_controls_tempo);
+	tempoSetup(transportWrapper.host_controls_tempo);
 
 	btnRewind.setButtonText(UNICON::rewind);
 	btnRewind.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::orange);
@@ -52,27 +48,8 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 	// connect the play button to the "playing" audio parameter
 	buttonAttachment = transportWrapper.tree.createButtonAttachment(IDS::playing, btnPlay);
 
-	// when the arbiter of the playing state changes, re-initialize the playing setup
-	transportWrapper.onHostControlsPlayingChanged = [&](bool hostControlsPlay)
-		{
-			btnPlay.setEnabled(!hostControlsPlay);
-			btnRewind.setEnabled(!hostControlsPlay);
-
-			btnPlay.onClick = [this]
-				{
-					// Interestingly, this gets called when the attached parameter changes even if the button is not clicked and even if the button is disabled
-					if (btnPlay.getToggleState()) {
-						btnPlay.setButtonText(UNICON::stop);
-					} else {
-						btnPlay.setButtonText(UNICON::play);
-					}
-					if(!this->transportWrapper.host_controls_playing) {
-						// also set the transport playing state
-						this->transportWrapper.playing = btnPlay.getToggleState();
-					}
-				};
-		};
-	transportWrapper.onHostControlsPlayingChanged(transportWrapper.host_controls_playing);
+	// initialize the playing setup
+	playControlSetup(transportWrapper.host_controls_playing);
 
 	// todo: implement transport position
 	transportPositionLabel.setText("1.1.1", juce::dontSendNotification);
@@ -85,9 +62,9 @@ UI_Transport::~UI_Transport() {}
 juce::String UI_Transport::getPosition()
 {
 	ppq = transportWrapper.ppq;
-	int bars = (int)ppq / transportWrapper.beat_duration;
-	int beats = (int)ppq % transportWrapper.bar_length;
-	int divisions = (int)(ppq * 4) % 4;
+	int bars = 1 + ((int)ppq / transportWrapper.beat_duration);
+	int beats = 1 + ((int)ppq % transportWrapper.bar_length);
+	int divisions = 1 + ((int)(ppq * 4) % 4);
 	return juce::String(bars) + "." + juce::String(beats) + "." + juce::String(divisions);
 }
 
@@ -100,6 +77,27 @@ void UI_Transport::paint(juce::Graphics& g)
 	g.setColour(juce::Colours::white);
 
 	g.setFont(14.0f);
+}
+
+void UI_Transport::playControlSetup(bool hostControls)
+{
+	btnPlay.setEnabled(!hostControls);
+	btnRewind.setEnabled(!hostControls);
+
+	btnPlay.onClick = [this]
+	{
+		// Interestingly, this gets called when the attached parameter changes even if the button is not clicked and even if the button is disabled
+		if (btnPlay.getToggleState()) {
+			btnPlay.setButtonText(UNICON::stop);
+		}
+		else {
+			btnPlay.setButtonText(UNICON::play);
+		}
+		if (!this->transportWrapper.host_controls_playing) {
+			// also set the transport playing state
+			this->transportWrapper.playing = btnPlay.getToggleState();
+		}
+	};
 }
 
 void UI_Transport::resized()
@@ -129,10 +127,6 @@ void UI_Transport::tempoSetup(bool hostControls)
 		tempoSpinner.setEnabled(false);
 		// we want to be able to match the host, so we'll allow for 2 decimals of precision
 		tempoSpinner.setNumDecimalPlacesToDisplay(2);
-		transportWrapper.onTempoChanged = [&](float tempo)
-			{
-				tempoSpinner.setValue(tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update
-			};
 		tempoSpinner.onValueChange= nullptr;
 	}
 	else {
@@ -140,12 +134,11 @@ void UI_Transport::tempoSetup(bool hostControls)
 		tempoSpinner.setNumDecimalPlacesToDisplay(0);
 		tempoSpinner.setEnabled(true);
 		tempoSpinner.onValueChange = [&]
-			{
-				// when the spinner value changes, update the tree
-				// this is causing access violation errors
-				transportWrapper.tempo = (int)round(tempoSpinner.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
-			};
-		transportWrapper.onTempoChanged = nullptr;
+		{
+			// when the spinner value changes, update the tree
+			// this is causing access violation errors
+			transportWrapper.tempo = (int)round(tempoSpinner.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
+		};
 	}
 }
 
@@ -153,4 +146,7 @@ void UI_Transport::timerCallback()
 {
 	tempoSpinner.timerCallback();
 	transportPositionLabel.setText(getPosition(), juce::dontSendNotification);
+	if (transportWrapper.host_controls_tempo) {
+		tempoSpinner.setValue(transportWrapper.tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update
+	}
 }
