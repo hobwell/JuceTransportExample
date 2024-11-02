@@ -88,7 +88,6 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
 		transportWrapper.rewind_flag = false;
 	}
 
-	//if (processor.getPlayHead()->getPosition().hasValue()) { // this always seems to be true, so skip it for now
 	hostInfo = *processor.getPlayHead()->getPosition();
 
 	// assumption: all hosts (outside standalone) will provide at least the playing state
@@ -162,7 +161,6 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
 	if (needsUpdate) {
 		recalculate();
 	}
-	//}
 
 	return getPosition();
 }

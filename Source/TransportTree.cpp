@@ -38,7 +38,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransportTree::createParamet
 	return { params.begin(), params.end() };
 }
 
-
 std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> TransportTree::createButtonAttachment(const juce::String& parameterID, juce::Button& button)
 {
 	return std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(apvts, parameterID, button);

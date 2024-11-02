@@ -36,11 +36,20 @@ private:
 
     bool initialized = false;
     float ppq = 0.f;
-    UI_Spinner tempoSpinner{ 0 };
+
+    juce::Label lblTimeSigSep;
+    UI_Spinner spinBarLength{ 0 };
+    UI_Spinner spinBeatLength{ 0 };
+    UI_Spinner spinTempo{ 0 };
     APVTSWrapper& transportWrapper;
 
-    void playControlSetup(bool hostControls);
-    void tempoSetup(bool hostControls);
+    juce::Desktop& desktop{ juce::Desktop::getInstance() };
+
+    void layout();
+
+    void setupPlayControl(bool hostControls);
+    void setupTempo(bool hostControls);
+    void setupTimeSignature(bool hostControls);
 
     juce::String getPosition();
 
@@ -50,8 +59,10 @@ private:
     juce::TextButton btnRewind;
 
     // attachments need to be created where they will be destroyed before the components they attache to
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> tempoAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> buttonAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_Tempo;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_BarLength;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_BeatLength;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> attach_Play;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_Transport)
 };

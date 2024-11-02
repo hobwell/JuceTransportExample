@@ -17,14 +17,27 @@
 UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(transportWrapper)
 {
 	// when the spinner value changes, update the tree
-	tempoSpinner.setValue(transportWrapper.tempo);
-	addAndMakeVisible(tempoSpinner);
+	spinTempo.setValue(transportWrapper.tempo);
+	addAndMakeVisible(spinTempo);
 	// connect the tempo slider to the "tempo" audio parameter
 	// this will adjust the slider's range to match the parameter's range - it's also supposed to bind the UI value to the parameter value, but it doesn't seem to do that for some reason
-	tempoAttachment = transportWrapper.tree.createSliderAttachment(IDS::tempo, tempoSpinner);
+	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
 
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
-	tempoSetup(transportWrapper.host_controls_tempo);
+	setupTempo(transportWrapper.host_controls_tempo);
+
+	spinBarLength.setValue(transportWrapper.bar_length);
+	addAndMakeVisible(spinBarLength);
+	attach_BarLength = transportWrapper.tree.createSliderAttachment(IDS::bar_length, spinBarLength);
+
+	lblTimeSigSep.setText("/", juce::dontSendNotification);
+	addAndMakeVisible(lblTimeSigSep);
+
+	spinBeatLength.setValue(transportWrapper.beat_duration);
+	addAndMakeVisible(spinBeatLength);
+	attach_BeatLength = transportWrapper.tree.createSliderAttachment(IDS::beat_duration, spinBeatLength);
+
+	setupTimeSignature(transportWrapper.host_controls_time_signature);
 
 	btnRewind.setButtonText(UNICON::rewind);
 	btnRewind.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::orange);
@@ -46,10 +59,10 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 	addAndMakeVisible(btnPlay);
 
 	// connect the play button to the "playing" audio parameter
-	buttonAttachment = transportWrapper.tree.createButtonAttachment(IDS::playing, btnPlay);
+	attach_Play = transportWrapper.tree.createButtonAttachment(IDS::playing, btnPlay);
 
 	// initialize the playing setup
-	playControlSetup(transportWrapper.host_controls_playing);
+	setupPlayControl(transportWrapper.host_controls_playing);
 
 	// todo: implement transport position
 	transportPositionLabel.setText("1.1.1", juce::dontSendNotification);
@@ -62,10 +75,50 @@ UI_Transport::~UI_Transport() {}
 juce::String UI_Transport::getPosition()
 {
 	ppq = transportWrapper.getPpq();
-	int bars = 1 + ((int)ppq / transportWrapper.beat_duration);
-	int beats = 1 + ((int)ppq % transportWrapper.bar_length);
-	int divisions = 1 + ((int)(ppq * 4) % 4);
+	
+	// get s scaler for converting ppq to based on the beat duration
+	float beatScale = transportWrapper.beat_duration / 4.f;
+	int divMod = 16.f / transportWrapper.beat_duration;
+
+	// convert ppq to number of total beats, based on the beat duration
+	float beatPosition = ppq * beatScale;
+	int bars = 1 + ((int)beatPosition / transportWrapper.bar_length);
+	int beats = 1 + ((int)beatPosition % transportWrapper.bar_length);
+	int divisions = 1 + ((int)(ppq * 4) % divMod); // 16th notes
 	return juce::String(bars) + "." + juce::String(beats) + "." + juce::String(divisions);
+}
+
+void UI_Transport::layout() {
+	// get the screen bounds
+	auto desktopArea = desktop.getDisplays().getMainDisplay().totalArea; // TODO: use this to construct a transport that makes sense
+	auto body = getLocalBounds();
+	int p = 5; // padding
+	int pp = p * 2; // double padding - added to width and height to account for padding on all sides
+	int h = 25; // height of the transport bar
+	int w = 400; // width of the transport bar
+	int bw = 25; // button width
+	
+	// define the inner area of the component
+	auto area = body.removeFromTop(h + pp).removeFromLeft(getWidth()); // transport should take the full width
+	area = area.removeFromLeft(w).reduced(p); // shrink to the width of the transport bar and apply padding
+
+	btnRewind.setBounds(area.removeFromLeft(bw));
+	btnPlay.setBounds(area.removeFromLeft(bw));
+	
+	area.removeFromLeft(bw); // spacer
+	
+	spinTempo.setBounds(area.removeFromLeft(50));
+
+	area.removeFromLeft(bw); // spacer
+
+	auto timeSigArea = area.removeFromLeft(64);
+	spinBarLength.setBounds(timeSigArea.removeFromLeft(25));
+	lblTimeSigSep.setBounds(timeSigArea.removeFromLeft(14));
+	spinBeatLength.setBounds(timeSigArea.removeFromLeft(25));
+
+	area.removeFromLeft(bw); // spacer
+
+	transportPositionLabel.setBounds(area.removeFromLeft(100));
 }
 
 void UI_Transport::paint(juce::Graphics& g)
@@ -79,7 +132,12 @@ void UI_Transport::paint(juce::Graphics& g)
 	g.setFont(14.0f);
 }
 
-void UI_Transport::playControlSetup(bool hostControls)
+void UI_Transport::resized()
+{
+	layout();
+}
+
+void UI_Transport::setupPlayControl(bool hostControls)
 {
 	btnPlay.setEnabled(!hostControls);
 	btnRewind.setEnabled(!hostControls);
@@ -100,54 +158,66 @@ void UI_Transport::playControlSetup(bool hostControls)
 		};
 }
 
-void UI_Transport::resized()
-{
-	auto body = getLocalBounds();
-	int p = 5; // padding
-	int pp = p * 2; // double padding - added to width and height to account for padding on all sides
-	int w = getWidth() - pp;
-	int h = getHeight() - pp;
-
-	// define the inner area of the component
-	auto area = body.removeFromLeft(w + pp).removeFromTop(h + pp).reduced(p);
-
-	btnRewind.setBounds(area.removeFromLeft(w / 14));
-	btnPlay.setBounds(area.removeFromLeft(w / 14));
-	tempoSpinner.setBounds(area.removeFromLeft(w / 7));
-	transportPositionLabel.setBounds(area.removeFromLeft(w * 2. / 7.));
-}
-
 /// <summary>
 /// Attaches handlers to the transport wrapper or the spinner, depending on the arbiter of the tempo
 /// </summary>
 /// <param name="hostControls"></param>
-void UI_Transport::tempoSetup(bool hostControls)
+void UI_Transport::setupTempo(bool hostControls)
 {
 	if (hostControls) {
-		tempoSpinner.setEnabled(false);
+		spinTempo.setEnabled(false);
 		// we want to be able to match the host, so we'll allow for 2 decimals of precision
-		tempoSpinner.setNumDecimalPlacesToDisplay(2);
-		tempoSpinner.onValueChange = nullptr;
+		spinTempo.setNumDecimalPlacesToDisplay(2);
+		spinTempo.onValueChange = nullptr;
 	}
 	else {
 		// when there is no host, we can set the tempo to an integer value
-		tempoSpinner.setNumDecimalPlacesToDisplay(0);
-		tempoSpinner.setEnabled(true);
-		tempoSpinner.onValueChange = [&]
+		spinTempo.setNumDecimalPlacesToDisplay(0);
+		spinTempo.setEnabled(true);
+		spinTempo.onValueChange = [&]
 			{
 				// when the spinner value changes, update the tree
 				// this is causing access violation errors
-				transportWrapper.tempo = (int)round(tempoSpinner.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
+				transportWrapper.tempo = (int)round(spinTempo.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
+			};
+	}
+}
+
+void UI_Transport::setupTimeSignature(bool hostControls)
+{
+	if (hostControls) {
+		spinBarLength.setEnabled(false);
+		spinBeatLength.setEnabled(false);
+		spinBarLength.onValueChange = nullptr;
+		spinBeatLength.onValueChange = nullptr;
+	}
+	else {
+		spinBarLength.setEnabled(true);
+		spinBeatLength.setEnabled(true);
+		spinBarLength.onValueChange = [&]
+			{
+				transportWrapper.bar_length = spinBarLength.getValue();
+			};
+		spinBeatLength.onValueChange = [&]
+			{
+				transportWrapper.beat_duration = spinBeatLength.getValue();
 			};
 	}
 }
 
 void UI_Transport::timerCallback()
 {
-	tempoSpinner.timerCallback();
+	spinBarLength.timerCallback();
+	spinBeatLength.timerCallback();
+	spinTempo.timerCallback();
+	
 	transportPositionLabel.setText(getPosition(), juce::dontSendNotification);
 	// pick up changes from the host
 	if (transportWrapper.host_controls_tempo) {
-		tempoSpinner.setValue(transportWrapper.tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update
+		spinTempo.setValue(transportWrapper.tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update
+	}
+	if (transportWrapper.host_controls_time_signature) {
+		spinBarLength.setValue(transportWrapper.bar_length, juce::NotificationType::dontSendNotification);
+		spinBeatLength.setValue(transportWrapper.beat_duration, juce::NotificationType::dontSendNotification);
 	}
 }
