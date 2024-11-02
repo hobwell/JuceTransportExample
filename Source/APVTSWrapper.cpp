@@ -23,6 +23,16 @@ APVTSWrapper::~APVTSWrapper()
 	apvts.state.removeListener(this);
 }
 
+float APVTSWrapper::getPpq()
+{
+	return *apvts.getRawParameterValue(IDS::ppq);
+}
+
+void APVTSWrapper::setPpq(float ppq)
+{
+	apvts.getRawParameterValue(IDS::ppq)->store(ppq);
+}
+
 /// <summary>
 /// Respond to changes in the APVTS
 /// </summary>
@@ -46,9 +56,6 @@ void APVTSWrapper::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHa
 		} else if (property == rewind_flag.getPropertyID()) {
 			rewind_flag.forceUpdateOfCachedValue();
 			apvts.getRawParameterValue(IDS::rewind_flag)->store(*rewind_flag);
-		} else if (property == ppq.getPropertyID()) {
-			ppq.forceUpdateOfCachedValue();
-			apvts.getRawParameterValue(IDS::ppq)->store(*ppq);
 		} else if (property == sample_rate.getPropertyID()) {
 			sample_rate.forceUpdateOfCachedValue();
 			apvts.getRawParameterValue(IDS::sample_rate)->store(*sample_rate);

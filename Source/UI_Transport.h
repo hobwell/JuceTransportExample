@@ -39,6 +39,7 @@ private:
     UI_Spinner tempoSpinner{ 0 };
     APVTSWrapper& transportWrapper;
 
+    void playControlSetup(bool hostControls);
     void tempoSetup(bool hostControls);
 
     juce::String getPosition();

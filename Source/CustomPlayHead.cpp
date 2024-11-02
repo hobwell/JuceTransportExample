@@ -193,5 +193,5 @@ void CustomPlayHead::updatePosition() const
 	bufferStart = bufferEnd;
 
 	// report the ppq position
-	transportWrapper.ppq = ppq; // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
+	transportWrapper.setPpq(ppq); // not using a cached value for ppq as it triggers a listener chain which can cause concurrent access errors on the listener list
 }

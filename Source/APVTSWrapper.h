@@ -32,7 +32,8 @@ struct APVTSWrapper : juce::ValueTree::Listener
     juce::CachedValue<bool> host_controls_time_signature{ apvts.state, IDS::host_controls_time_sig, undoManager, false };
     juce::CachedValue<bool> playing{ apvts.state, IDS::playing, undoManager, false };
     juce::CachedValue<bool> rewind_flag{ apvts.state, IDS::rewind_flag, undoManager, false };
-    juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
+    // ppq is not a good candidate for a cached value, as it is frequently updated
+    //juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
     juce::CachedValue<float> sample_rate{ apvts.state, IDS::sample_rate, undoManager, 384000 };
     juce::CachedValue<float> tempo{ apvts.state, IDS::tempo, undoManager, 120 };
 
@@ -44,6 +45,9 @@ struct APVTSWrapper : juce::ValueTree::Listener
 
     APVTSWrapper(TransportTree* transportTree, juce::UndoManager* undoManager);
     ~APVTSWrapper();
+
+    float getPpq();
+    void setPpq(float ppq);
 
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
