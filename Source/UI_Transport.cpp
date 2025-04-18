@@ -14,7 +14,7 @@
 
 
 //==============================================================================
-UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(transportWrapper)
+UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) : transportWrapper(transportWrapper)
 {
 	// when the spinner value changes, update the tree
 	spinTempo.setValue(transportWrapper.tempo);
@@ -39,15 +39,16 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 
 	setupTimeSignature(transportWrapper.host_controls_time_signature);
 
-	spinBars.setRange(1, 9999, 1);
+	
+	spinBars.safeSetRange(1, 9999, 1);
 	spinBars.setValue(1);
 	addAndMakeVisible(spinBars);
 
-	spinBeats.setRange(1, spinBarLength.getValue(), 1);
+	spinBeats.safeSetRange(1, spinBarLength.getValue(), 1);
 	spinBeats.setValue(1);
 	addAndMakeVisible(spinBeats);
 
-	spinSubdiv.setRange(1, (int)(16.f / spinBeatLength.getValue()),1);
+	spinSubdiv.safeSetRange(1, (int)(16.f / spinBeatLength.getValue()),1);
 	spinSubdiv.setValue(1);
 	addAndMakeVisible(spinSubdiv);
 
@@ -85,18 +86,20 @@ void UI_Transport::getPosition()
 {
 	ppq = transportWrapper.getPpq();
 	
-	// get a scaler for converting ppq to beats based on the beat duration
-	float beatScale = 4.f / transportWrapper.beat_duration;
-	int divMod = 16.f / transportWrapper.beat_duration;
-	
-	spinSubdiv.setRange(1, (int) divMod, 1); // recalculate range
-	spinBeats.setRange(1, transportWrapper.bar_length, 1);
+	// Calculate the number of subdivisions per beat based on beat_duration
+	int subDivisionsPerBeat = 16 / transportWrapper.beat_duration;  // This adjusts based on beat duration
+
+	// Calculate the scaler for converting PPQ to beats based on beat duration
+	float quarterNotesPerBeat = 4.0f / transportWrapper.beat_duration; // Adjust beat rate based on beat duration
+
+	spinBeats.safeSetRange (1, transportWrapper.bar_length, 1);
+	spinSubdiv.safeSetRange (1, (int) subDivisionsPerBeat, 1); // recalculate range
 
 	// convert ppq to number of total beats, based on the beat duration
-	float beatPosition = ppq / beatScale;
+	float beatPosition = ppq / quarterNotesPerBeat;
 	int bars = 1 + ((int)beatPosition / transportWrapper.bar_length);
-	int beats = 1 + ((int)beatPosition % transportWrapper.bar_length);
-	int divisions = 1 + ((int)(ppq * 4) % divMod); // 16th notes
+	int beats = 1 + ((int) ppq % transportWrapper.bar_length);
+	int divisions = 1 + ((int) (ppq * subDivisionsPerBeat) % subDivisionsPerBeat);
 	
 	spinBars.setValue(bars);
 	spinBeats.setValue(beats);
@@ -213,7 +216,7 @@ void UI_Transport::setupTimeSignature(bool hostControls)
 		spinBeatLength.setEnabled(false);
 		spinBarLength.onValueChange = [&] 
 			{
-				spinBeats.setRange(1, spinBarLength.getValue(), 1);
+				spinBeats.safeSetRange(1, spinBarLength.getValue(), 1);
 			};
 		spinBeatLength.onValueChange = nullptr;
 	}

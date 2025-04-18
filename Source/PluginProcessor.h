@@ -29,7 +29,7 @@ public:
     // decided that this limitation should also be applied when running in 
     // standalone mode.
     std::shared_ptr<TransportTree> transportTree; 
-    std::shared_ptr<APVTSWrapper> transportWrapper;
+    std::shared_ptr<ApvtsWrapper> transportWrapper;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;

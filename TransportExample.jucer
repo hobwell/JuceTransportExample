@@ -11,9 +11,9 @@
               file="Source/StringConstants.h"/>
       </GROUP>
       <GROUP id="{D020E1CD-FE85-0E00-D4B5-8501DBF540A3}" name="Parameters">
-        <FILE id="KIQE3d" name="APVTSWrapper.cpp" compile="1" resource="0"
-              file="Source/APVTSWrapper.cpp"/>
-        <FILE id="H68scF" name="APVTSWrapper.h" compile="0" resource="0" file="Source/APVTSWrapper.h"/>
+        <FILE id="KIQE3d" name="ApvtsWrapper.cpp" compile="1" resource="0"
+              file="Source/ApvtsWrapper.cpp"/>
+        <FILE id="H68scF" name="ApvtsWrapper.h" compile="0" resource="0" file="Source/ApvtsWrapper.h"/>
         <FILE id="LVjJ6c" name="TransportTree.cpp" compile="1" resource="0"
               file="Source/TransportTree.cpp"/>
         <FILE id="tWZn2W" name="TransportTree.h" compile="0" resource="0" file="Source/TransportTree.h"/>

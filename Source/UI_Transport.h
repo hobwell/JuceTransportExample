@@ -23,7 +23,7 @@ class UI_Transport : public juce::Component, public juce::ChangeBroadcaster
 public:
     bool playing = false;
 
-    UI_Transport(APVTSWrapper& transportWrapper);
+    UI_Transport(ApvtsWrapper& transportWrapper);
     ~UI_Transport() override;
 
     void paint(juce::Graphics&) override;
@@ -44,7 +44,7 @@ private:
     UI_Spinner spinBeats{ 0, juce::Justification::right, true };
     UI_Spinner spinSubdiv{ 0, juce::Justification::right, false };
     UI_Spinner spinTempo{ 0, juce::Justification::centred, false };
-    APVTSWrapper& transportWrapper;
+    ApvtsWrapper& transportWrapper;
 
     juce::Desktop& desktop{ juce::Desktop::getInstance() };
 

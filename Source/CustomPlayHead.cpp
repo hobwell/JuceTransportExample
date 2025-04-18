@@ -11,7 +11,7 @@
 #include <JuceHeader.h>
 #include "CustomPlayHead.h"
 
-CustomPlayHead::CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, APVTSWrapper& wrapper)
+CustomPlayHead::CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, ApvtsWrapper& wrapper)
     : processor(proc),
     transportWrapper(wrapper),
     sampleRate(sampleRateIn)
@@ -193,7 +193,7 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
 */
 void CustomPlayHead::recalculate() const
 {
-    beatsPerQuarterNote = timeSig.denominator / 4.f;
+    beatsPerQuarterNote = tempoRelativeNoteDuration / timeSig.denominator;
     secondsPerBeat = 60.f / bpm;
     samplesPerBeat = sampleRate * secondsPerBeat;
     needsUpdate = false;

@@ -18,7 +18,7 @@
 /// raise events in response to changes to those parameters.
 /// </summary>
 /// <see href="https://www.classcentral.com/classroom/youtube-vars-values-and-valuetrees-state-management-in-juce-jelle-bakker-adc23-320032">ADC23 - Jelle Bakker: Vars, Values and ValueTrees: Managing State with JUCE</see>
-struct APVTSWrapper : juce::ValueTree::Listener
+struct ApvtsWrapper : juce::ValueTree::Listener
 {
     juce::AudioProcessorValueTreeState& apvts;
     TransportTree& tree;
@@ -33,7 +33,7 @@ struct APVTSWrapper : juce::ValueTree::Listener
     juce::CachedValue<bool> playing{ apvts.state, IDS::playing, undoManager, false };
     juce::CachedValue<bool> rewind_flag{ apvts.state, IDS::rewind_flag, undoManager, false };
     // ppq is not a good candidate for a cached value, as it is frequently updated
-    //juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
+    // juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
     juce::CachedValue<float> sample_rate{ apvts.state, IDS::sample_rate, undoManager, 384000 };
     juce::CachedValue<float> tempo{ apvts.state, IDS::tempo, undoManager, 120 };
 
@@ -44,14 +44,13 @@ struct APVTSWrapper : juce::ValueTree::Listener
     std::function<void(bool)> onHostControlsTimeSignatureChanged;
     std::function<void(float)> onTempoChanged;
 
-    APVTSWrapper(TransportTree* transportTree, juce::UndoManager* undoManager);
-    ~APVTSWrapper();
+    ApvtsWrapper(TransportTree* transportTree, juce::UndoManager* undoManager);
+    ~ApvtsWrapper();
 
     float getPpq();
     void setPpq(float ppq);
 
-    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
-
+ 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(APVTSWrapper)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ApvtsWrapper)
 };

@@ -33,6 +33,8 @@ public:
     void timerCallback();
     void valueChanged() override;
 
+    void safeSetRange(double newMin, double newMax, double newInterval);
+
     std::function<void(int)> onValueChanged;
 
 private:

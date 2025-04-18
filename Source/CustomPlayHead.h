@@ -27,14 +27,14 @@
 class CustomPlayHead : public juce::AudioPlayHead
 {
 public:
-	CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, APVTSWrapper& wrapper);
+	CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, ApvtsWrapper& wrapper);
 
 	~CustomPlayHead() override;
 
 	juce::Optional<PositionInfo> getPosition(int bufferSize) const;
 
 private:
-	APVTSWrapper& transportWrapper;
+	ApvtsWrapper& transportWrapper;
 
 	juce::AudioProcessor& processor;
 	juce::AudioPlayHead::PositionInfo& info = juce::AudioPlayHead::PositionInfo();
@@ -49,6 +49,7 @@ private:
 	mutable double sampleRate = 48000.0;
 	mutable uint64_t timeNs = 0;
 	mutable juce::AudioPlayHead::TimeSignature timeSig{ 4, 4 };
+	mutable float tempoRelativeNoteDuration = 4.f; // what note value to use for the tempo relative note duration
 
 	// external transport info - represents the "external" state of the transport (from either the host or the GUI)
 	bool isStandalone = false;
@@ -63,8 +64,9 @@ private:
 	mutable int bufferSize = 480;
 	mutable float samplesPerBeat = sampleRate * secondsPerBeat;
 	mutable float secondsPerBeat = 60.f / bpm; // 120 bpm
-	mutable float beatsPerQuarterNote = timeSig.denominator / 4.f;
+	mutable float beatsPerQuarterNote = tempoRelativeNoteDuration / timeSig.denominator; // unclear why this is correct?
 	mutable float quarterNotesPerBuffer = bufferSize / (samplesPerBeat * beatsPerQuarterNote);
+ 
 
 	juce::Optional<PositionInfo> getPosition() const override;
 

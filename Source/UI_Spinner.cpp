@@ -1,9 +1,9 @@
 /*
   ==============================================================================
 
-	UI_Spinner.cpp
-	Created: 14 Sep 2024 1:23:17pm
-	Author:  Nicholas
+    UI_Spinner.cpp
+    Created: 14 Sep 2024 1:23:17pm
+    Author:  Nicholas
 
   ==============================================================================
 */
@@ -13,13 +13,13 @@
 
 UI_Spinner::UI_Spinner(int numDecimalsToDisplay, juce::Justification align = juce::Justification::centred, bool alwaysShowDecimal = false) : juce::Slider(juce::Slider::SliderStyle::RotaryVerticalDrag, juce::Slider::NoTextBox)
 {
-	setNumDecimalPlacesToDisplay(numDecimalsToDisplay);
-	permanentDecimal = alwaysShowDecimal;
+    setNumDecimalPlacesToDisplay(numDecimalsToDisplay);
+    permanentDecimal = alwaysShowDecimal;
 
-	label.setText(getDisplayString(getValue()), juce::NotificationType::dontSendNotification);
-	label.setInterceptsMouseClicks(false, false);
-	label.setJustificationType(align);
-	addAndMakeVisible(label);
+    label.setText(getDisplayString(getValue()), juce::NotificationType::dontSendNotification);
+    label.setInterceptsMouseClicks(false, false);
+    label.setJustificationType(align);
+    addAndMakeVisible(label);
 }
 
 UI_Spinner::~UI_Spinner() {}
@@ -35,59 +35,77 @@ UI_Spinner::~UI_Spinner() {}
 /// </remarks>
 juce::String UI_Spinner::getDisplayString(const double value)
 {
-	std::stringstream ss;
-	ss << std::fixed << std::setprecision(getNumDecimalPlacesToDisplay()) << value;
-	if (permanentDecimal && getNumDecimalPlacesToDisplay() == 0) {
-		ss << ".";
-	}
-	std::string stringValue = ss.str();
-	return stringValue;
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(getNumDecimalPlacesToDisplay()) << value;
+    if (permanentDecimal && getNumDecimalPlacesToDisplay() == 0)
+    {
+        ss << ".";
+    }
+    std::string stringValue = ss.str();
+    return stringValue;
 }
 
 void UI_Spinner::mouseDown(const juce::MouseEvent& e)
 {
-	juce::Slider::mouseDown(e);
+    juce::Slider::mouseDown(e);
 }
 
 void UI_Spinner::mouseUp(const juce::MouseEvent& e)
 {
-	juce::Slider::mouseUp(e);
+    juce::Slider::mouseUp(e);
 }
 
 void UI_Spinner::paint(juce::Graphics& g)
 {
-	// don't draw anything
+    // don't draw anything
 }
 
 void UI_Spinner::resized()
 {
-	juce::Slider::resized();
-	label.setBounds(getLocalBounds());
+    juce::Slider::resized();
+    label.setBounds(getLocalBounds());
+}
+
+void UI_Spinner::safeSetRange(double min, double max, double interval)
+{
+    if (min == max)
+    {
+        max = min + 1;
+        setValue(min);
+        setEnabled(false);
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
+    Slider::setRange(min, max, interval);
 }
 
 void UI_Spinner::setValue(float newValue, juce::NotificationType notificationType)
 {
-	waitingNotificationType = notificationType;
-	waitingValue = newValue;
-	awaitingChange = true;
+    waitingNotificationType = notificationType;
+    waitingValue = newValue;
+    awaitingChange = true;
 }
 
 void UI_Spinner::timerCallback()
 {
-	updateGui();
+    updateGui();
 }
 
 void UI_Spinner::updateGui()
 {
-	if (awaitingChange) {
-		juce::Slider::setValue(waitingValue, waitingNotificationType);
-		label.setText(getDisplayString(getValue()), waitingNotificationType);
-		awaitingChange = false;
-	}
+    if (awaitingChange)
+    {
+        juce::Slider::setValue(waitingValue, waitingNotificationType);
+        label.setText(getDisplayString(getValue()), waitingNotificationType);
+        awaitingChange = false;
+    }
 }
 
 void UI_Spinner::valueChanged()
 {
-	label.setText(getDisplayString(getValue()), juce::NotificationType::dontSendNotification);
-	juce::NullCheckedInvocation::invoke(onValueChanged, getValue());
+    label.setText(getDisplayString(getValue()), juce::NotificationType::dontSendNotification);
+    juce::NullCheckedInvocation::invoke(onValueChanged, getValue());
 }
