@@ -38,9 +38,12 @@ private:
     float ppq = 0.f;
 
     juce::Label lblTimeSigSep;
-    UI_Spinner spinBarLength{ 0 };
-    UI_Spinner spinBeatLength{ 0 };
-    UI_Spinner spinTempo{ 0 };
+    UI_Spinner spinBarLength{ 0, juce::Justification::centred, false };
+    UI_Spinner spinBeatLength{ 0, juce::Justification::centred, false};
+    UI_Spinner spinBars{ 0, juce::Justification::right, true };
+    UI_Spinner spinBeats{ 0, juce::Justification::right, true };
+    UI_Spinner spinSubdiv{ 0, juce::Justification::right, false };
+    UI_Spinner spinTempo{ 0, juce::Justification::centred, false };
     APVTSWrapper& transportWrapper;
 
     juce::Desktop& desktop{ juce::Desktop::getInstance() };
@@ -51,9 +54,7 @@ private:
     void setupTempo(bool hostControls);
     void setupTimeSignature(bool hostControls);
 
-    juce::String getPosition();
-
-    juce::Label transportPositionLabel;
+    void getPosition();
 
     juce::TextButton btnPlay;
     juce::TextButton btnRewind;

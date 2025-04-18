@@ -39,6 +39,18 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 
 	setupTimeSignature(transportWrapper.host_controls_time_signature);
 
+	spinBars.setRange(1, 9999, 1);
+	spinBars.setValue(1);
+	addAndMakeVisible(spinBars);
+
+	spinBeats.setRange(1, spinBarLength.getValue(), 1);
+	spinBeats.setValue(1);
+	addAndMakeVisible(spinBeats);
+
+	spinSubdiv.setRange(1, (int)(16.f / spinBeatLength.getValue()),1);
+	spinSubdiv.setValue(1);
+	addAndMakeVisible(spinSubdiv);
+
 	btnRewind.setButtonText(UNICON::rewind);
 	btnRewind.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::orange);
 	btnRewind.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
@@ -48,6 +60,7 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 	btnRewind.onClick = [this]
 		{
 			this->transportWrapper.rewind_flag = true;
+			getPosition();
 		};
 
 	btnPlay.setButtonText(UNICON::play);
@@ -64,39 +77,46 @@ UI_Transport::UI_Transport(APVTSWrapper& transportWrapper) : transportWrapper(tr
 	// initialize the playing setup
 	setupPlayControl(transportWrapper.host_controls_playing);
 
-	// todo: implement transport position
-	transportPositionLabel.setText("1.1.1", juce::dontSendNotification);
-	addAndMakeVisible(transportPositionLabel);
-
 }
 
 UI_Transport::~UI_Transport() {}
 
-juce::String UI_Transport::getPosition()
+void UI_Transport::getPosition()
 {
 	ppq = transportWrapper.getPpq();
 	
-	// get s scaler for converting ppq to based on the beat duration
-	float beatScale = transportWrapper.beat_duration / 4.f;
+	// get a scaler for converting ppq to beats based on the beat duration
+	float beatScale = 4.f / transportWrapper.beat_duration;
 	int divMod = 16.f / transportWrapper.beat_duration;
+	
+	spinSubdiv.setRange(1, (int) divMod, 1); // recalculate range
+	spinBeats.setRange(1, transportWrapper.bar_length, 1);
 
 	// convert ppq to number of total beats, based on the beat duration
-	float beatPosition = ppq * beatScale;
+	float beatPosition = ppq / beatScale;
 	int bars = 1 + ((int)beatPosition / transportWrapper.bar_length);
 	int beats = 1 + ((int)beatPosition % transportWrapper.bar_length);
 	int divisions = 1 + ((int)(ppq * 4) % divMod); // 16th notes
-	return juce::String(bars) + "." + juce::String(beats) + "." + juce::String(divisions);
+	
+	spinBars.setValue(bars);
+	spinBeats.setValue(beats);
+	spinSubdiv.setValue(divisions);
+
+	spinBars.timerCallback();
+	spinBeats.timerCallback();
+	spinSubdiv.timerCallback();
 }
 
 void UI_Transport::layout() {
 	// get the screen bounds
-	auto desktopArea = desktop.getDisplays().getMainDisplay().totalArea; // TODO: use this to construct a transport that makes sense
+	auto desktopArea = desktop.getDisplays().getMainDisplay().totalArea; // TODO: use this information to scale the transport view (e.g. for 4k displays)
+
 	auto body = getLocalBounds();
 	int p = 5; // padding
 	int pp = p * 2; // double padding - added to width and height to account for padding on all sides
 	int h = 25; // height of the transport bar
 	int w = 400; // width of the transport bar
-	int bw = 25; // button width
+	int bw = 35; // button width
 	
 	// define the inner area of the component
 	auto area = body.removeFromTop(h + pp).removeFromLeft(getWidth()); // transport should take the full width
@@ -118,7 +138,10 @@ void UI_Transport::layout() {
 
 	area.removeFromLeft(bw); // spacer
 
-	transportPositionLabel.setBounds(area.removeFromLeft(100));
+	auto posArea = area.removeFromLeft(110);
+	spinBars.setBounds(posArea.removeFromLeft(50));
+	spinBeats.setBounds(posArea.removeFromLeft(30));
+	spinSubdiv.setBounds(posArea.removeFromLeft(30));
 }
 
 void UI_Transport::paint(juce::Graphics& g)
@@ -188,7 +211,10 @@ void UI_Transport::setupTimeSignature(bool hostControls)
 	if (hostControls) {
 		spinBarLength.setEnabled(false);
 		spinBeatLength.setEnabled(false);
-		spinBarLength.onValueChange = nullptr;
+		spinBarLength.onValueChange = [&] 
+			{
+				spinBeats.setRange(1, spinBarLength.getValue(), 1);
+			};
 		spinBeatLength.onValueChange = nullptr;
 	}
 	else {
@@ -211,7 +237,7 @@ void UI_Transport::timerCallback()
 	spinBeatLength.timerCallback();
 	spinTempo.timerCallback();
 	
-	transportPositionLabel.setText(getPosition(), juce::dontSendNotification);
+	getPosition();
 	// pick up changes from the host
 	if (transportWrapper.host_controls_tempo) {
 		spinTempo.setValue(transportWrapper.tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update

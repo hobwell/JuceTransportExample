@@ -46,7 +46,7 @@ void APVTSWrapper::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHa
 	if (treeWhosePropertyHasChanged == apvts.state) {
 		if (property == bar_length.getPropertyID()) {
 			bar_length.forceUpdateOfCachedValue();
-			//apvts.getRawParameterValue(IDS::bar_length)->store(*bar_length);
+			apvts.getRawParameterValue(IDS::bar_length)->store(*bar_length);
 		} else if (property == beat_duration.getPropertyID()) {
 			beat_duration.forceUpdateOfCachedValue();
 			apvts.getRawParameterValue(IDS::beat_duration)->store(*beat_duration);

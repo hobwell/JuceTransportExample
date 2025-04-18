@@ -11,13 +11,14 @@
 #include <JuceHeader.h>
 #include "UI_Spinner.h"
 
-UI_Spinner::UI_Spinner(int numDecimalsToDisplay) : juce::Slider(juce::Slider::SliderStyle::RotaryVerticalDrag, juce::Slider::NoTextBox)
+UI_Spinner::UI_Spinner(int numDecimalsToDisplay, juce::Justification align = juce::Justification::centred, bool alwaysShowDecimal = false) : juce::Slider(juce::Slider::SliderStyle::RotaryVerticalDrag, juce::Slider::NoTextBox)
 {
 	setNumDecimalPlacesToDisplay(numDecimalsToDisplay);
-	
+	permanentDecimal = alwaysShowDecimal;
+
 	label.setText(getDisplayString(getValue()), juce::NotificationType::dontSendNotification);
 	label.setInterceptsMouseClicks(false, false);
-	label.setJustificationType(juce::Justification::centred);
+	label.setJustificationType(align);
 	addAndMakeVisible(label);
 }
 
@@ -36,6 +37,9 @@ juce::String UI_Spinner::getDisplayString(const double value)
 {
 	std::stringstream ss;
 	ss << std::fixed << std::setprecision(getNumDecimalPlacesToDisplay()) << value;
+	if (permanentDecimal && getNumDecimalPlacesToDisplay() == 0) {
+		ss << ".";
+	}
 	std::string stringValue = ss.str();
 	return stringValue;
 }

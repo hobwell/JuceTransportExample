@@ -52,9 +52,9 @@ private:
 
 	// external transport info - represents the "external" state of the transport (from either the host or the GUI)
 	bool isStandalone = false;
-	mutable float exTempo;
-	mutable bool exPlaying;
-	mutable juce::AudioPlayHead::TimeSignature exTimeSig{ 4, 4 };
+	mutable float nextTempo;
+	mutable bool nextPlaying;
+	mutable juce::AudioPlayHead::TimeSignature nextTimeSig{ 4, 4 };
 
 	bool useThisPlayhead = false;
 

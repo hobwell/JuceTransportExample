@@ -16,11 +16,14 @@
 /// <summary>
 /// A MAX style number box that allows the user to click and drag to change the value of a parameter.
 /// </summary>
+// TODO: Make a better spinner...
 class UI_Spinner : public juce::Slider
 {
 public:
-    UI_Spinner(int numDecimalsToDisplay);
+    UI_Spinner(int numDecimalsToDisplay, juce::Justification align, bool alwaysShowDecimal);
     ~UI_Spinner() override;
+
+    bool permanentDecimal = false; // indicates whether the decimal should always be shown (even when there are no decimlal places being displayed)
 
     void mouseDown(const juce::MouseEvent& event) override;
     void mouseUp(const juce::MouseEvent& event) override;
