@@ -10,9 +10,9 @@
 
 #include "APVTSWrapper.h"
 
-ApvtsWrapper::ApvtsWrapper(TransportTree* transportTree, juce::UndoManager* undoManager) :
-	tree(*transportTree),
-	apvts(transportTree->apvts),
+ApvtsWrapper::ApvtsWrapper(TransportTree* transport_tree, juce::UndoManager* undoManager) :
+	tree(*transport_tree),
+	apvts(transport_tree->apvts),
 	undoManager(undoManager)
 {
 	apvts.state.addListener(this);

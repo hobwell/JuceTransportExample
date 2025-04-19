@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "UI_Spinner.h"
+#include "KeyValueParameter.h"
 
 UI_Spinner::UI_Spinner(int numDecimalsToDisplay, juce::Justification align = juce::Justification::centred, bool alwaysShowDecimal = false) : juce::Slider(juce::Slider::SliderStyle::RotaryVerticalDrag, juce::Slider::NoTextBox)
 {
@@ -29,18 +30,25 @@ UI_Spinner::~UI_Spinner() {}
 /// </summary>
 /// <param name="numDecimals"></param>
 /// <remarks>
-/// Vecause the slider may be linked to an audio parameter, we need a method to set the precision of the text being displayed 
+/// Because the slider may be linked to an audio parameter, we need a method to set the precision of the text being displayed 
 /// there are overloads for the parameter to provide a string converter for it, but we can't know what conversion function we 
 /// want (based on the transport) until after the parameters have been initialized, so we'll use a local function to handle it.
 /// </remarks>
 juce::String UI_Spinner::getDisplayString(const double value)
 {
     std::stringstream ss;
+    if (keyValueMap != nullptr)
+    {
+        int index = juce::jlimit(0, (int) keyValueMap->size() - 1, (int) std::round(value));
+        return (*keyValueMap)[index].key;
+    }
+
     ss << std::fixed << std::setprecision(getNumDecimalPlacesToDisplay()) << value;
     if (permanentDecimal && getNumDecimalPlacesToDisplay() == 0)
     {
         ss << ".";
     }
+
     std::string stringValue = ss.str();
     return stringValue;
 }
@@ -82,6 +90,15 @@ void UI_Spinner::safeSetRange(double min, double max, double interval)
     Slider::setRange(min, max, interval);
 }
 
+void UI_Spinner::setValueMap(const std::vector<KeyValuePair>* map)
+{
+    keyValueMap = map;
+    for (size_t i = 0; i < keyValueMap->size(); ++i)
+    {
+        labelToIndex[(*keyValueMap)[i].key] = static_cast<int>(i);
+    }
+}
+
 void UI_Spinner::setValue(float newValue, juce::NotificationType notificationType)
 {
     waitingNotificationType = notificationType;
@@ -89,6 +106,20 @@ void UI_Spinner::setValue(float newValue, juce::NotificationType notificationTyp
     awaitingChange = true;
 }
 
+void UI_Spinner::setValueFromKey(const std::string& key)
+{
+    if (keyValueMap != nullptr)
+    {
+        auto it = std::find_if(keyValueMap->begin(), keyValueMap->end(),
+            [&key](const KeyValuePair& pair) { return pair.key == key; });
+
+        if (it != keyValueMap->end())
+        {
+            // Set the corresponding value in the APVTS (you can replace `setValue` with APVTS update logic)
+            setValue((*it).value);
+        }
+    }
+}
 void UI_Spinner::timerCallback()
 {
     updateGui();

@@ -19,9 +19,15 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) : transportWrapper(tr
 	// when the spinner value changes, update the tree
 	spinTempo.setValue(transportWrapper.tempo);
 	addAndMakeVisible(spinTempo);
+
 	// connect the tempo slider to the "tempo" audio parameter
 	// this will adjust the slider's range to match the parameter's range - it's also supposed to bind the UI value to the parameter value, but it doesn't seem to do that for some reason
 	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
+
+	spinTempoDuration.setValueMap(&TEMPO::duration_options);
+	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_duration, spinTempoDuration);
+    spinTempoDuration.setValueFromKey("x");
+	addAndMakeVisible(spinTempoDuration);
 
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
 	setupTempo(transportWrapper.host_controls_tempo);
@@ -38,8 +44,7 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) : transportWrapper(tr
 	attach_BeatLength = transportWrapper.tree.createSliderAttachment(IDS::beat_duration, spinBeatLength);
 
 	setupTimeSignature(transportWrapper.host_controls_time_signature);
-
-	
+		
 	spinBars.safeSetRange(1, 9999, 1);
 	spinBars.setValue(1);
 	addAndMakeVisible(spinBars);
@@ -118,7 +123,7 @@ void UI_Transport::layout() {
 	int p = 5; // padding
 	int pp = p * 2; // double padding - added to width and height to account for padding on all sides
 	int h = 25; // height of the transport bar
-	int w = 400; // width of the transport bar
+	int w = 450; // width of the transport bar
 	int bw = 35; // button width
 	
 	// define the inner area of the component
@@ -130,6 +135,7 @@ void UI_Transport::layout() {
 	
 	area.removeFromLeft(bw); // spacer
 	
+	spinTempoDuration.setBounds(area.removeFromLeft(50));
 	spinTempo.setBounds(area.removeFromLeft(50));
 
 	area.removeFromLeft(bw); // spacer

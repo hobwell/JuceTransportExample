@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "KeyValuePair.h"
 
 /// <summary>
 /// ValueTree Parameter Identifiers
@@ -28,7 +29,8 @@ namespace IDS
 	const juce::String rewind_flag("rewind_flag");
 	const juce::String sample_rate("sample_rate");
 	const juce::String tempo("tempo");
-	const juce::String transportTree("transportTree");
+	const juce::String tempo_duration("tempo_duration");
+	const juce::String transport_tree("transport_tree");
 }
 
 /// <summary>
@@ -48,6 +50,28 @@ namespace LABELS
 	const juce::String rewind_flag("Rewind Flag");
 	const juce::String sample_rate("Sample Rate");
 	const juce::String tempo("Tempo");
+	const juce::String tempo_duration("Tempo Duration");
+}
+
+namespace TEMPO
+{
+	const std::vector<KeyValuePair> duration_options = {
+		{"w", 1.f},
+		{"h.", 0.75f},
+		{"h", 0.5f},
+		{"q.", 0.375f},
+		{"q", 0.25f},
+		{"e.", 0.1875f},
+		{"e", 0.125f},
+		{"s.", 0.09375f},
+		{"s", 0.0625f},
+		{"t.", 0.046875f},
+		{"t", 0.03125f},
+		{"i.", 0.015625f},
+		{"i", 0.0078125f},
+		{"x.", 0.00390625f},
+		{"x", 0.001953125f}
+	};
 }
 
 /// <summary>

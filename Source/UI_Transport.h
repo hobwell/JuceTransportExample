@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "UI_Spinner.h"
+#include "UI_ChoiceSpinner.h"
 #include "TransportTree.h"
 #include "APVTSWrapper.h"
 
@@ -44,6 +45,8 @@ private:
     UI_Spinner spinBeats{ 0, juce::Justification::right, true };
     UI_Spinner spinSubdiv{ 0, juce::Justification::right, false };
     UI_Spinner spinTempo{ 0, juce::Justification::centred, false };
+    UI_Spinner spinTempoDuration { 0, juce::Justification::centred, false };
+
     ApvtsWrapper& transportWrapper;
 
     juce::Desktop& desktop{ juce::Desktop::getInstance() };
@@ -61,9 +64,11 @@ private:
 
     // attachments need to be created where they will be destroyed before the components they attache to
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_Tempo;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_TempoOptions;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_BarLength;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_BeatLength;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> attach_Play;
+    
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_Transport)
 };

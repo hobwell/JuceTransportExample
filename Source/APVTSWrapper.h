@@ -44,7 +44,7 @@ struct ApvtsWrapper : juce::ValueTree::Listener
     std::function<void(bool)> onHostControlsTimeSignatureChanged;
     std::function<void(float)> onTempoChanged;
 
-    ApvtsWrapper(TransportTree* transportTree, juce::UndoManager* undoManager);
+    ApvtsWrapper(TransportTree* transport_tree, juce::UndoManager* undoManager);
     ~ApvtsWrapper();
 
     float getPpq();

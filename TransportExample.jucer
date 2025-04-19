@@ -14,11 +14,20 @@
         <FILE id="KIQE3d" name="ApvtsWrapper.cpp" compile="1" resource="0"
               file="Source/ApvtsWrapper.cpp"/>
         <FILE id="H68scF" name="ApvtsWrapper.h" compile="0" resource="0" file="Source/ApvtsWrapper.h"/>
+        <FILE id="xZfsJs" name="KeyValuePair.h" compile="0" resource="0" file="Source/KeyValuePair.h"/>
+        <FILE id="WPdgKA" name="KeyValueParameter.cpp" compile="1" resource="0"
+              file="Source/KeyValueParameter.cpp"/>
+        <FILE id="gDZ4vV" name="KeyValueParameter.h" compile="0" resource="0"
+              file="Source/KeyValueParameter.h"/>
         <FILE id="LVjJ6c" name="TransportTree.cpp" compile="1" resource="0"
               file="Source/TransportTree.cpp"/>
         <FILE id="tWZn2W" name="TransportTree.h" compile="0" resource="0" file="Source/TransportTree.h"/>
       </GROUP>
       <GROUP id="{77CE7882-BC54-2B4A-4FF4-3E4B5791F4C4}" name="Components">
+        <FILE id="UKfnqW" name="UI_ChoiceSpinner.cpp" compile="1" resource="0"
+              file="Source/UI_ChoiceSpinner.cpp"/>
+        <FILE id="jERT3O" name="UI_ChoiceSpinner.h" compile="0" resource="0"
+              file="Source/UI_ChoiceSpinner.h"/>
         <FILE id="K6u8pP" name="UI_Spinner.cpp" compile="1" resource="0" file="Source/UI_Spinner.cpp"/>
         <FILE id="ptqSsl" name="UI_Spinner.h" compile="0" resource="0" file="Source/UI_Spinner.h"/>
         <FILE id="xraZKV" name="UI_Transport.cpp" compile="1" resource="0"

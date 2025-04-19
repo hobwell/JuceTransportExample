@@ -28,7 +28,7 @@ public:
     // so it makes sense to use a single transport tree for all instances.  I 
     // decided that this limitation should also be applied when running in 
     // standalone mode.
-    std::shared_ptr<TransportTree> transportTree; 
+    std::shared_ptr<TransportTree> transport_tree; 
     std::shared_ptr<ApvtsWrapper> transportWrapper;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;

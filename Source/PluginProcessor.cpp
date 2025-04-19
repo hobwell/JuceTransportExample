@@ -22,8 +22,8 @@ TransportExampleAudioProcessor::TransportExampleAudioProcessor()
                        )
 #endif
 {
-    transportTree = std::make_shared<TransportTree>(*this, nullptr, IDS::transportTree);
-    transportWrapper = std::make_shared<ApvtsWrapper>(transportTree.get(), nullptr);
+    transport_tree = std::make_shared<TransportTree>(*this, nullptr, IDS::transport_tree);
+    transportWrapper = std::make_shared<ApvtsWrapper>(transport_tree.get(), nullptr);
 }
 
 TransportExampleAudioProcessor::~TransportExampleAudioProcessor()

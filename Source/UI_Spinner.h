@@ -35,6 +35,10 @@ public:
 
     void safeSetRange(double newMin, double newMax, double newInterval);
 
+    void setValueMap(const std::vector<KeyValuePair>* map);
+
+    void setValueFromKey(const std::string& key);
+
     std::function<void(int)> onValueChanged;
 
 private:
@@ -43,6 +47,9 @@ private:
     juce::NotificationType waitingNotificationType = juce::NotificationType::dontSendNotification;
     float waitingValue = 0.f;
     
+    const std::vector<KeyValuePair>* keyValueMap = nullptr;
+    std::unordered_map<juce::String, int> labelToIndex;
+
     void updateGui();
     juce::String getDisplayString(const double value);
 
