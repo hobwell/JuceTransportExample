@@ -41,19 +41,21 @@ private:
 	juce::AudioPlayHead::PositionInfo& hostInfo = juce::AudioPlayHead::PositionInfo();
 
 	// internal transport info - represents the current state of the playhead
-	mutable double bpm = 120.0;
 	mutable bool isPlaying = false;
 	mutable double ppq = 0.0;
 	mutable uint64_t bufferEnd = 0;
 	mutable uint64_t bufferStart = 0;
 	mutable double sampleRate = 48000.0;
+	mutable double tempo = 120.0;
+	mutable float tempoRelativeNoteDuration = 0.25f; // what fraction to use for the tempo relative note duration (0.25 = quarter note, 0.5 = half note, etc.)
 	mutable uint64_t timeNs = 0;
-	mutable juce::AudioPlayHead::TimeSignature timeSig{ 4, 4 };
-	mutable float tempoRelativeNoteDuration = 4.f; // what note value to use for the tempo relative note duration
+	mutable juce::AudioPlayHead::TimeSignature timeSig {4, 4};
+    mutable bool timeSigControlsTempoRelativeNoteDuration = false; // if the time signature controls the tempo relative note duration
 
 	// external transport info - represents the "external" state of the transport (from either the host or the GUI)
 	bool isStandalone = false;
 	mutable float nextTempo;
+	mutable float nextTempoRelativeNoteDuration;
 	mutable bool nextPlaying;
 	mutable juce::AudioPlayHead::TimeSignature nextTimeSig{ 4, 4 };
 
@@ -63,10 +65,9 @@ private:
 	mutable bool needsUpdate = false;
 	mutable int bufferSize = 480;
 	mutable float samplesPerBeat = sampleRate * secondsPerBeat;
-	mutable float secondsPerBeat = 60.f / bpm; // 120 bpm
-	mutable float beatsPerQuarterNote = tempoRelativeNoteDuration / timeSig.denominator; // unclear why this is correct?
-	mutable float quarterNotesPerBuffer = bufferSize / (samplesPerBeat * beatsPerQuarterNote);
- 
+	mutable float secondsPerBeat = 60.f / tempo; // 120 tempo
+	mutable float beatsPerQuarterNote = (1.f / timeSig.denominator) / tempoRelativeNoteDuration;
+	mutable float quarterNotesPerBuffer = bufferSize / (samplesPerBeat * beatsPerQuarterNote); 
 
 	juce::Optional<PositionInfo> getPosition() const override;
 

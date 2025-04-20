@@ -14,7 +14,9 @@
 
 
 //==============================================================================
-UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) : transportWrapper(transportWrapper)
+UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
+	transportWrapper(transportWrapper),
+    spinTempoDuration(transportWrapper.apvts, IDS::tempo_duration, TEMPO::duration_options)
 {
 	// when the spinner value changes, update the tree
 	spinTempo.setValue(transportWrapper.tempo);
@@ -23,11 +25,10 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) : transportWrapper(tr
 	// connect the tempo slider to the "tempo" audio parameter
 	// this will adjust the slider's range to match the parameter's range - it's also supposed to bind the UI value to the parameter value, but it doesn't seem to do that for some reason
 	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
-
-	spinTempoDuration.setValueMap(&TEMPO::duration_options);
+    
+	
 	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_duration, spinTempoDuration);
-    spinTempoDuration.setValueFromKey("x");
-	addAndMakeVisible(spinTempoDuration);
+    addAndMakeVisible(spinTempoDuration);
 
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
 	setupTempo(transportWrapper.host_controls_tempo);

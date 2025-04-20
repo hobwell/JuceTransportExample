@@ -35,13 +35,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransportTree::createParamet
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (IDS::ppq, LABELS::ppq, -99999.f, 99999.f, 0)); // 27+hrs at 60bpm, 13+hrs @ 120bpm etc.
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (IDS::sample_rate, LABELS::sample_rate, 0.f, 384000.f, 48000.f));
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (IDS::tempo, LABELS::tempo, 20.f, 999.f, 120.f));
-	juce::StringArray tempoOptions;
-	for (const auto& opt : TEMPO::duration_options)
-	{
-		tempoOptions.add(opt.key);
-	}
 
-	params.push_back(std::make_unique<juce::AudioParameterChoice>(IDS::tempo_duration, LABELS::tempo_duration, tempoOptions, 4)); // default to q
+    // need to specify the step size for the tempo duration so that it can be exact
+    juce::NormalisableRange<float> tempoSteppedRange(0.0078125f, 1.0f, 0.00390625f); // step size is 1/256
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(IDS::tempo_duration, LABELS::tempo_duration, tempoSteppedRange, 0.25f));
 
 	return { params.begin(), params.end() };
 }

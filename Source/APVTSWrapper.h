@@ -36,13 +36,7 @@ struct ApvtsWrapper : juce::ValueTree::Listener
     // juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
     juce::CachedValue<float> sample_rate{ apvts.state, IDS::sample_rate, undoManager, 384000 };
     juce::CachedValue<float> tempo{ apvts.state, IDS::tempo, undoManager, 120 };
-
-    std::function<void(int)> onBarLengthChanged;
-    std::function<void(bool)> onHostControlsPlayingChanged;
-    std::function<void(bool)> onHostControlsPositionChanged;
-    std::function<void(bool)> onHostControlsTempoChanged;
-    std::function<void(bool)> onHostControlsTimeSignatureChanged;
-    std::function<void(float)> onTempoChanged;
+    juce::CachedValue<float> tempo_relative_note_duration{ apvts.state, IDS::tempo_duration, undoManager, 0.25f };
 
     ApvtsWrapper(TransportTree* transport_tree, juce::UndoManager* undoManager);
     ~ApvtsWrapper();

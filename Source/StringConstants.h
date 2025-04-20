@@ -55,7 +55,7 @@ namespace LABELS
 
 namespace TEMPO
 {
-	const std::vector<KeyValuePair> duration_options = {
+	const std::vector<std::pair<juce::String, float>> duration_options = {
 		{"w", 1.f},
 		{"h.", 0.75f},
 		{"h", 0.5f},
@@ -67,10 +67,10 @@ namespace TEMPO
 		{"s", 0.0625f},
 		{"t.", 0.046875f},
 		{"t", 0.03125f},
-		{"i.", 0.015625f},
-		{"i", 0.0078125f},
-		{"x.", 0.00390625f},
-		{"x", 0.001953125f}
+		{"i.", 0.0234375},
+		{"i", 0.015625f},
+		{"x.", 0.01171875f},
+		{"x", 0.0078125f}
 	};
 }
 
