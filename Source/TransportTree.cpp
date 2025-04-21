@@ -9,7 +9,7 @@
 */
 
 #include "TransportTree.h"
-#include "KeyValueParameter.h"
+#include "SyncedAudioParameterFloat.h"
 
 // struct TransportTree
 
@@ -29,16 +29,22 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransportTree::createParamet
 	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::host_controls_play, LABELS::host_controls_play_state, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::host_controls_position, LABELS::host_controls_position_state, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::host_controls_tempo, LABELS::host_controls_tempo_state, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::host_controls_tempo_relative_note_duration, LABELS::host_controls_tempo_relative_note_duration, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::host_controls_time_sig, LABELS::host_controls_time_signature_state, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::rewind_flag, LABELS::rewind_flag, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::playing, LABELS::playing, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (IDS::time_signature_controls_tempo_relative_note_duration, LABELS::time_signature_controls_tempo_relative_note_duration, false));
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (IDS::ppq, LABELS::ppq, -99999.f, 99999.f, 0)); // 27+hrs at 60bpm, 13+hrs @ 120bpm etc.
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (IDS::sample_rate, LABELS::sample_rate, 0.f, 384000.f, 48000.f));
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (IDS::tempo, LABELS::tempo, 20.f, 999.f, 120.f));
 
+	//juce::NormalisableRange<float> tempoSteppedRange(20.f, 999.f, 1.f); // step size is 1/256
+	//params.push_back (std::make_unique<juce::AudioParameterFloat> (IDS::tempo, LABELS::tempo, tempoSteppedRange, 120.f));
+
     // need to specify the step size for the tempo duration so that it can be exact
-    juce::NormalisableRange<float> tempoSteppedRange(0.0078125f, 1.0f, 0.00390625f); // step size is 1/256
-	params.push_back(std::make_unique<juce::AudioParameterFloat>(IDS::tempo_duration, LABELS::tempo_duration, tempoSteppedRange, 0.25f));
+    juce::NormalisableRange<float> tempoDurationSteppedRange(0.0078125f, 1.0f, 0.00390625f); // step size is 1/256
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(IDS::tempo_relative_note_duration, LABELS::tempo_relative_note_duration, tempoDurationSteppedRange, 0.25f));
+	//params.push_back(std::make_unique<SyncedAudioParameterFloat>(IDS::tempo_relative_note_duration, LABELS::tempo_relative_note_duration, tempoSteppedRange, 0.25f, apvts.state));
 
 	return { params.begin(), params.end() };
 }

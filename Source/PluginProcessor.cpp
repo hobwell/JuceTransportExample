@@ -152,6 +152,7 @@ void TransportExampleAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         buffer.clear(i, 0, buffer.getNumSamples());
     }
 
+    customPlayHead->synchronizeState(); // synchronize the playhead state with the transport state
     juce::AudioPlayHead::PositionInfo posInfo = *customPlayHead->getPosition(buffer.getNumSamples());
 
     // TODO: whatever you need to do...

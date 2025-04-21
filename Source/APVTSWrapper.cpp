@@ -9,6 +9,7 @@
 */
 
 #include "APVTSWrapper.h"
+#include "SyncedAudioParameterFloat.h"
 
 ApvtsWrapper::ApvtsWrapper(TransportTree* transport_tree, juce::UndoManager* undoManager) :
 	tree(*transport_tree),
@@ -31,4 +32,25 @@ float ApvtsWrapper::getPpq()
 void ApvtsWrapper::setPpq(float ppq)
 {
 	apvts.getRawParameterValue(IDS::ppq)->store(ppq);
+}
+
+
+/// <summary>
+/// Respond to changes in the APVTS
+/// </summary>
+/// <remarks>
+/// When a parameter in the tree changes, this method will trigger on every 
+/// instance of the wrapper - consider passing a single instance of the 
+/// wrapper around, rather than creating multiple instances.
+/// </remarks>
+void ApvtsWrapper::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property)
+{
+	if (treeWhosePropertyHasChanged == apvts.state)
+	{
+        DBG("Property changed: " << property.toString() << " = " << apvts.state.getProperty(property).toString());
+		if (property == juce::Identifier(IDS::tempo_relative_note_duration))
+		{
+			
+		}
+	}
 }

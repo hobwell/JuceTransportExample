@@ -88,6 +88,25 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
 {
     this->bufferSize = bufferSize;
 
+    return getPosition();
+}
+
+/*
+* Recalculate time domain values
+*/
+void CustomPlayHead::recalculate() const
+{
+    beatsPerQuarterNote = (1.f / timeSig.denominator) / tempoRelativeNoteDuration;
+    secondsPerBeat = 60.f / tempo;
+    samplesPerBeat = sampleRate * secondsPerBeat;
+    needsUpdate = false;
+}
+
+/*
+* Synchronize the playhead state, ahead of calling getPosition()
+*/
+void CustomPlayHead::synchronizeState()
+{
     if (transportWrapper.rewind_flag)
     {
         bufferEnd = 0;
@@ -117,6 +136,7 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
     {
         isPlaying = !isPlaying;
         // set the playing state in the transport params
+        //updateParameter(IDS::playing, isPlaying);
         transportWrapper.playing = isPlaying;
         DBG("TParam: " << *transportWrapper.apvts.getRawParameterValue(IDS::playing));
     }
@@ -129,7 +149,7 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
     }
     else
     {
-        nextTempo = transportWrapper.tempo;
+        nextTempo = transportWrapper.apvts.getRawParameterValue(IDS::tempo)->load();
         transportWrapper.host_controls_tempo = false;
     }
 
@@ -141,7 +161,8 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
         if (transportWrapper.host_controls_tempo)
         {
             // set the tempo in the transport params
-            transportWrapper.tempo = nextTempo;
+            updateParameter(IDS::tempo, nextTempo);
+            //transportWrapper.tempo = nextTempo;
         }
     };
 
@@ -150,15 +171,23 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
     {
         nextTimeSig = *hostInfo.getTimeSignature();
         transportWrapper.host_controls_time_signature = true;
+        //updateParameter(IDS::host_controls_time_sig, true);
         // TODO - need to know if all DAWs do this:
-        timeSigControlsTempoRelativeNoteDuration = true;
+        //updateParameter(IDS::host_controls_tempo_relative_note_duration, true);
+        transportWrapper.host_controls_tempo_relative_note_duration = true;
+        //updateParameter(IDS::time_signature_controls_tempo_relative_note_duration, true);
+        transportWrapper.time_signature_controls_tempo_relative_note_duration = true;
     }
     else
     {
         nextTimeSig.numerator = transportWrapper.bar_length;
         nextTimeSig.denominator = transportWrapper.beat_duration;
+        //updateParameter(IDS::host_controls_time_sig, false);
         transportWrapper.host_controls_time_signature = false;
-        timeSigControlsTempoRelativeNoteDuration = false;
+        updateParameter(IDS::host_controls_tempo_relative_note_duration, false);
+        transportWrapper.host_controls_tempo_relative_note_duration = false;
+        updateParameter(IDS::time_signature_controls_tempo_relative_note_duration, false);
+        transportWrapper.time_signature_controls_tempo_relative_note_duration = false;
     }
 
     // check if the time signature has changed
@@ -168,14 +197,15 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
         timeSig.denominator = nextTimeSig.denominator;
         needsUpdate = true;
         // set the time signature in the transport params
-        transportWrapper.bar_length = nextTimeSig.numerator;
-        transportWrapper.beat_duration = nextTimeSig.denominator;
-        
+        updateParameter(IDS::bar_length, nextTimeSig.numerator);
+        //transportWrapper.bar_length = nextTimeSig.numerator;
+        updateParameter(IDS::beat_duration, nextTimeSig.denominator);
+        //transportWrapper.beat_duration = nextTimeSig.denominator;
         DBG("Time Signature: " << timeSig.numerator << "/" << timeSig.denominator);
     }
 
     // check if tempo relative note duration has changed
-    if (timeSigControlsTempoRelativeNoteDuration)
+    if (transportWrapper.time_signature_controls_tempo_relative_note_duration)
     {
         // set the tempo relative note duration based on the time signature
         nextTempoRelativeNoteDuration = 1.f / timeSig.denominator;
@@ -190,7 +220,8 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
         tempoRelativeNoteDuration = nextTempoRelativeNoteDuration;
         needsUpdate = true;
         // set the tempo relative note duration in the transport params
-        transportWrapper.tempo_relative_note_duration = nextTempoRelativeNoteDuration;
+        updateParameter(IDS::tempo_relative_note_duration, nextTempoRelativeNoteDuration);
+        //transportWrapper.tempo_relative_note_duration = nextTempoRelativeNoteDuration;
     }
 
     // check if the host has position info (but only if the host has play control)
@@ -207,19 +238,6 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
     {
         recalculate();
     }
-
-    return getPosition();
-}
-
-/*
-* Recalculate time domain values
-*/
-void CustomPlayHead::recalculate() const
-{
-    beatsPerQuarterNote = (1.f / timeSig.denominator) / tempoRelativeNoteDuration;
-    secondsPerBeat = 60.f / tempo;
-    samplesPerBeat = sampleRate * secondsPerBeat;
-    needsUpdate = false;
 }
 
 /*

@@ -29,14 +29,16 @@ struct ApvtsWrapper : juce::ValueTree::Listener
     juce::CachedValue<bool> host_controls_playing{ apvts.state, IDS::host_controls_play, undoManager, false };
     juce::CachedValue<bool> host_controls_position{ apvts.state, IDS::host_controls_position, undoManager, false };
     juce::CachedValue<bool> host_controls_tempo{ apvts.state, IDS::host_controls_tempo, undoManager, false };
+    juce::CachedValue<bool> host_controls_tempo_relative_note_duration {apvts.state, IDS::host_controls_tempo_relative_note_duration, undoManager, false};
     juce::CachedValue<bool> host_controls_time_signature{ apvts.state, IDS::host_controls_time_sig, undoManager, false };
     juce::CachedValue<bool> playing{ apvts.state, IDS::playing, undoManager, false };
     juce::CachedValue<bool> rewind_flag{ apvts.state, IDS::rewind_flag, undoManager, false };
+    juce::CachedValue<bool> time_signature_controls_tempo_relative_note_duration {apvts.state, IDS::time_signature_controls_tempo_relative_note_duration, undoManager, false};
     // ppq is not a good candidate for a cached value, as it is frequently updated
     // juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
     juce::CachedValue<float> sample_rate{ apvts.state, IDS::sample_rate, undoManager, 384000 };
     juce::CachedValue<float> tempo{ apvts.state, IDS::tempo, undoManager, 120 };
-    juce::CachedValue<float> tempo_relative_note_duration{ apvts.state, IDS::tempo_duration, undoManager, 0.25f };
+    juce::CachedValue<float> tempo_relative_note_duration{ apvts.state, IDS::tempo_relative_note_duration, undoManager, 0.25f };
 
     ApvtsWrapper(TransportTree* transport_tree, juce::UndoManager* undoManager);
     ~ApvtsWrapper();
@@ -44,6 +46,7 @@ struct ApvtsWrapper : juce::ValueTree::Listener
     float getPpq();
     void setPpq(float ppq);
 
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
  
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ApvtsWrapper)

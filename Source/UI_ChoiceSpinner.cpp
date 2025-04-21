@@ -1,105 +1,82 @@
 #include "UI_ChoiceSpinner.h"
 
-UI_ChoiceSpinner::UI_ChoiceSpinner(juce::AudioProcessorValueTreeState& apvtsRef,
-    const juce::String& paramID_,
-    KeyValueList choices)
-    : apvts(apvtsRef), paramID(paramID_), keyValues(std::move(choices))
+UI_ChoiceSpinner::UI_ChoiceSpinner(KeyValueList choices)
+    : keyValues(std::move(choices))
 {
-    parameter = apvts.getParameter(paramID);
-    jassert(parameter != nullptr);
-
-    apvts.addParameterListener(paramID, this);
-
-    updateValueFromParameter();
-}
-
-UI_ChoiceSpinner::~UI_ChoiceSpinner()
-{
-    apvts.removeParameterListener(paramID, this);
+    setSliderStyle(Slider::SliderStyle::LinearBarVertical);
+    setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+    onValueChange = [this] ()
+        {
+            DBG("UI_ChoiceSpinner value changed: " << getValue());
+        };
 }
 
 void UI_ChoiceSpinner::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::darkgrey);
+    g.fillAll(juce::Colours::transparentBlack);
+
+    auto label = getLabelForValue(getValue());
     g.setColour(juce::Colours::white);
-    g.setFont(18.0f);
-
-    auto text = keyValues[selectedIndex].first;
-    g.drawText(text, getLocalBounds(), juce::Justification::centred, true);
-}
-
-void UI_ChoiceSpinner::resized()
-{
-    // No children to layout
+    g.setFont(16.0f);
+    g.drawFittedText(label, getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void UI_ChoiceSpinner::mouseDown(const juce::MouseEvent& e)
 {
     dragStartY = e.y;
+    initialValue = getValue();
 }
 
 void UI_ChoiceSpinner::mouseDrag(const juce::MouseEvent& e)
 {
     int dragDelta = dragStartY - e.y;
-    int steps = dragDelta / 10; // Change value every 10 pixels dragged
+    int step = dragDelta / 10; // 10 pixels per step
+    int currentIndex = 0;
 
-    if (steps != 0)
-    {
-        changeIndex(steps);
-        dragStartY = e.y; // Reset to prevent large jumps
-    }
-}
-
-void UI_ChoiceSpinner::changeIndex(int delta)
-{
-    setIndex(juce::jlimit(0, static_cast<int>(keyValues.size()) - 1, selectedIndex + delta));
-}
-
-void UI_ChoiceSpinner::setIndex(int newIndex)
-{
-    if (newIndex != selectedIndex && parameter != nullptr)
-    {
-        selectedIndex = newIndex;
-        parameter->beginChangeGesture();
-        parameter->setValueNotifyingHost(parameter->convertTo0to1(keyValues[selectedIndex].second));
-        parameter->endChangeGesture();
-        DBG("getValue() " << parameter->getValue());
-        DBG("convertTo0to1() " << parameter->convertTo0to1(parameter->getValue()));
-        DBG("convertFrom0to1() " << parameter->convertFrom0to1(parameter->getValue()));
-        repaint();
-    }
-}
-
-void UI_ChoiceSpinner::syncWithParameterValue(float value)
-{
     for (size_t i = 0; i < keyValues.size(); ++i)
     {
-        if (juce::approximatelyEqual(keyValues[i].second, value))
+        if (std::abs(keyValues[i].second - initialValue) < 0.0001f)
         {
-            selectedIndex = static_cast<int>(i);
-            repaint();
-            return;
+            currentIndex = static_cast<int>(i);
+            break;
         }
     }
+
+    int newIndex = juce::jlimit(0, static_cast<int>(keyValues.size()) - 1, currentIndex + step);
+    float newValue = keyValues[newIndex].second;
+    setValue(newValue, juce::sendNotificationAsync); // this triggers attachment update
 }
 
-void UI_ChoiceSpinner::updateValueFromParameter()
+float UI_ChoiceSpinner::getClosestValue(float value) const
 {
-    if (parameter != nullptr)
+    float closest = keyValues.front().second;
+    float minDiff = std::abs(value - closest);
+
+    for (const auto& kv : keyValues)
     {
-        float actualValue = parameter->convertFrom0to1(parameter->getValue());
-        syncWithParameterValue(actualValue);
+        float diff = std::abs(value - kv.second);
+        if (diff < minDiff)
+        {
+            closest = kv.second;
+            minDiff = diff;
+        }
     }
+
+    return closest;
 }
 
-void UI_ChoiceSpinner::parameterChanged(const juce::String& id, float newValue)
+juce::String UI_ChoiceSpinner::getLabelForValue(float value) const
 {
-    if (id == paramID)
+    float closest = getClosestValue(value);
+    for (const auto& kv : keyValues)
     {
-        // Called from a non-UI thread; must sync with the UI thread
-        juce::MessageManager::callAsync([this, newValue] ()
-            {
-                syncWithParameterValue(parameter->convertFrom0to1(newValue));
-            });
+        if (std::abs(kv.second - closest) < 0.0001f)
+            return kv.first;
     }
+    return {};
+}
+
+void UI_ChoiceSpinner::valueChanged()
+{
+    juce::NullCheckedInvocation::invoke(onValueChanged, getValue());
 }

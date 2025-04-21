@@ -55,6 +55,7 @@ private:
 
     void setupPlayControl(bool hostControls);
     void setupTempo(bool hostControls);
+    void setupTempoRelativeNoteDuration(bool hostControls);
     void setupTimeSignature(bool hostControls);
 
     void getPosition();

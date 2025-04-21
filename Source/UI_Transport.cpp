@@ -10,13 +10,14 @@
 
 #include <JuceHeader.h>
 #include "UI_Transport.h"
+#include "SyncedAudioParameterFloat.h"
 
 
 
 //==============================================================================
 UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	transportWrapper(transportWrapper),
-    spinTempoDuration(transportWrapper.apvts, IDS::tempo_duration, TEMPO::duration_options)
+    spinTempoDuration(TEMPO::duration_options)
 {
 	// when the spinner value changes, update the tree
 	spinTempo.setValue(transportWrapper.tempo);
@@ -25,13 +26,13 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	// connect the tempo slider to the "tempo" audio parameter
 	// this will adjust the slider's range to match the parameter's range - it's also supposed to bind the UI value to the parameter value, but it doesn't seem to do that for some reason
 	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
-    
 	
-	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_duration, spinTempoDuration);
+	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_relative_note_duration, spinTempoDuration);
     addAndMakeVisible(spinTempoDuration);
 
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
 	setupTempo(transportWrapper.host_controls_tempo);
+    setupTempoRelativeNoteDuration(transportWrapper.host_controls_tempo_relative_note_duration);
 
 	spinBarLength.setValue(transportWrapper.bar_length);
 	addAndMakeVisible(spinBarLength);
@@ -207,37 +208,64 @@ void UI_Transport::setupTempo(bool hostControls)
 		// when there is no host, we can set the tempo to an integer value
 		spinTempo.setNumDecimalPlacesToDisplay(0);
 		spinTempo.setEnabled(true);
-		spinTempo.onValueChange = [&]
-			{
-				// when the spinner value changes, update the tree
-				// this is causing access violation errors
-				transportWrapper.tempo = (int)round(spinTempo.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
-			};
+		//spinTempo.onValueChange = [&]
+		//	{
+		//		// when the spinner value changes, update the tree
+		//		// this is causing access violation errors
+		//		transportWrapper.tempo = (int)round(spinTempo.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
+		//	};
+	}
+}
+
+/// <summary>
+/// Attaches handlers to the transport wrapper or the spinner, depending on the arbiter of the tempo relative note duration
+/// </summary>
+/// <param name="hostControls"></param>
+void UI_Transport::setupTempoRelativeNoteDuration(bool hostControls)
+{
+	if (hostControls)
+	{
+		spinTempoDuration.setEnabled(false);
+		spinTempoDuration.onValueChange = nullptr;
+	}
+	else
+	{
+		// when there is no host, we can set the tempo to an integer value
+		spinTempoDuration.setEnabled(true);
+		//spinTempoDuration.onValueChange = [&]
+		//	{
+		//		// when the spinner value changes, update the tree
+		//		transportWrapper.tempo_relative_note_duration = spinTempoDuration.getValue();
+		//	};
 	}
 }
 
 void UI_Transport::setupTimeSignature(bool hostControls)
 {
+	spinBarLength.onValueChange = [&]
+		{
+			// safely allow beats (i.e. transport position (bars:beats:divs) to be a range of 1 value (i.e. if there is 1 beat per bar)
+			spinBeats.safeSetRange(1, spinBarLength.getValue(), 1);
+		};
+
 	if (hostControls) {
 		spinBarLength.setEnabled(false);
 		spinBeatLength.setEnabled(false);
-		spinBarLength.onValueChange = [&] 
-			{
-				spinBeats.safeSetRange(1, spinBarLength.getValue(), 1);
-			};
 		spinBeatLength.onValueChange = nullptr;
 	}
 	else {
 		spinBarLength.setEnabled(true);
 		spinBeatLength.setEnabled(true);
-		spinBarLength.onValueChange = [&]
-			{
-				transportWrapper.bar_length = spinBarLength.getValue();
-			};
-		spinBeatLength.onValueChange = [&]
-			{
-				transportWrapper.beat_duration = spinBeatLength.getValue();
-			};
+		spinBarLength.onValueChange = nullptr;
+		//spinBarLength.onValueChange = [&]
+		//	{
+		//		transportWrapper.bar_length = spinBarLength.getValue();
+		//	};
+		spinBeatLength.onValueChange = nullptr;
+		//spinBeatLength.onValueChange = [&]
+		//	{
+		//		transportWrapper.beat_duration = spinBeatLength.getValue();
+		//	};
 	}
 }
 
@@ -249,11 +277,11 @@ void UI_Transport::timerCallback()
 	
 	getPosition();
 	// pick up changes from the host
-	if (transportWrapper.host_controls_tempo) {
-		spinTempo.setValue(transportWrapper.tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update
-	}
-	if (transportWrapper.host_controls_time_signature) {
-		spinBarLength.setValue(transportWrapper.bar_length, juce::NotificationType::dontSendNotification);
-		spinBeatLength.setValue(transportWrapper.beat_duration, juce::NotificationType::dontSendNotification);
-	}
+	//if (transportWrapper.host_controls_tempo) {
+	//	spinTempo.setValue(transportWrapper.tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update
+	//}
+	//if (transportWrapper.host_controls_time_signature) {
+	//	spinBarLength.setValue(transportWrapper.bar_length, juce::NotificationType::dontSendNotification);
+	//	spinBeatLength.setValue(transportWrapper.beat_duration, juce::NotificationType::dontSendNotification);
+	//}
 }
