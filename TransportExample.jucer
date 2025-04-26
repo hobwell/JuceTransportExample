@@ -14,10 +14,6 @@
         <FILE id="KIQE3d" name="ApvtsWrapper.cpp" compile="1" resource="0"
               file="Source/ApvtsWrapper.cpp"/>
         <FILE id="H68scF" name="ApvtsWrapper.h" compile="0" resource="0" file="Source/ApvtsWrapper.h"/>
-        <FILE id="aComLt" name="SyncedAudioParameterFloat.cpp" compile="1"
-              resource="0" file="Source/SyncedAudioParameterFloat.cpp"/>
-        <FILE id="RlUG5b" name="SyncedAudioParameterFloat.h" compile="0" resource="0"
-              file="Source/SyncedAudioParameterFloat.h"/>
         <FILE id="LVjJ6c" name="TransportTree.cpp" compile="1" resource="0"
               file="Source/TransportTree.cpp"/>
         <FILE id="tWZn2W" name="TransportTree.h" compile="0" resource="0" file="Source/TransportTree.h"/>

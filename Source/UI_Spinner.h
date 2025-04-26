@@ -29,8 +29,7 @@ public:
     void mouseUp(const juce::MouseEvent& event) override;
     void paint(juce::Graphics&) override;
     void resized() override;
-    void setValue(float newValue, juce::NotificationType notification = juce::NotificationType::sendNotificationAsync);
-    void timerCallback();
+    //void setValue(float newValue, juce::NotificationType notification = juce::NotificationType::sendNotificationAsync);
     void valueChanged() override;
 
     void safeSetRange(double newMin, double newMax, double newInterval);
@@ -38,13 +37,14 @@ public:
     std::function<void(int)> onValueChanged;
 
 private:
-    std::atomic<bool> awaitingChange = false;
     juce::Label label;
+    bool locked = false; // to handle when the range is a single value - we need to enhance isEnabled() with this
+    bool wasEnabled = true; // to handle when the range is a single value - we need to enhance isEnabled() with this
     juce::NotificationType waitingNotificationType = juce::NotificationType::dontSendNotification;
-    float waitingValue = 0.f;
-    
-    void updateGui();
-    juce::String getDisplayString(const double value);
+
+    juce::String getDisplayString();
+
+    void setLocked(bool locked);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_Spinner)
 };

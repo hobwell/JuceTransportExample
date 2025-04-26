@@ -10,54 +10,45 @@
 
 #include <JuceHeader.h>
 #include "UI_Transport.h"
-#include "SyncedAudioParameterFloat.h"
-
-
 
 //==============================================================================
 UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	transportWrapper(transportWrapper),
     spinTempoDuration(TEMPO::duration_options)
 {
-	// when the spinner value changes, update the tree
-	spinTempo.setValue(transportWrapper.tempo);
-	addAndMakeVisible(spinTempo);
-
 	// connect the tempo slider to the "tempo" audio parameter
 	// this will adjust the slider's range to match the parameter's range - it's also supposed to bind the UI value to the parameter value, but it doesn't seem to do that for some reason
 	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
-	
-	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_relative_note_duration, spinTempoDuration);
+	addAndMakeVisible(spinTempo);
+
+	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_speed, spinTempoDuration);
     addAndMakeVisible(spinTempoDuration);
 
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
 	setupTempo(transportWrapper.host_controls_tempo);
-    setupTempoRelativeNoteDuration(transportWrapper.host_controls_tempo_relative_note_duration);
+    setupTempoRelativeNoteDuration(transportWrapper.host_controls_tempo_speed);
 
-	spinBarLength.setValue(transportWrapper.bar_length);
-	addAndMakeVisible(spinBarLength);
 	attach_BarLength = transportWrapper.tree.createSliderAttachment(IDS::bar_length, spinBarLength);
+	addAndMakeVisible(spinBarLength);
 
 	lblTimeSigSep.setText("/", juce::dontSendNotification);
 	addAndMakeVisible(lblTimeSigSep);
 
-	spinBeatLength.setValue(transportWrapper.beat_duration);
-	addAndMakeVisible(spinBeatLength);
 	attach_BeatLength = transportWrapper.tree.createSliderAttachment(IDS::beat_duration, spinBeatLength);
+	addAndMakeVisible(spinBeatLength);
 
 	setupTimeSignature(transportWrapper.host_controls_time_signature);
-		
-	spinBars.safeSetRange(1, 9999, 1);
-	spinBars.setValue(1);
+
+	attach_Pos_Bar = transportWrapper.tree.createSliderAttachment(IDS::pos_bar, spinBars);
 	addAndMakeVisible(spinBars);
 
-	spinBeats.safeSetRange(1, spinBarLength.getValue(), 1);
-	spinBeats.setValue(1);
+	attach_Pos_Beat = transportWrapper.tree.createSliderAttachment(IDS::pos_beat, spinBeats);
 	addAndMakeVisible(spinBeats);
 
-	spinSubdiv.safeSetRange(1, (int)(16.f / spinBeatLength.getValue()),1);
-	spinSubdiv.setValue(1);
-	addAndMakeVisible(spinSubdiv);
+	attach_Pos_Div = transportWrapper.tree.createSliderAttachment(IDS::pos_div, spinBeatDivisions);
+	addAndMakeVisible(spinBeatDivisions);
+
+	setupPosition(transportWrapper.host_controls_position);
 
 	btnRewind.setButtonText(UNICON::rewind);
 	btnRewind.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::orange);
@@ -71,6 +62,9 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 			getPosition();
 		};
 
+	// connect the play button to the "playing" audio parameter
+	attach_Play = transportWrapper.tree.createButtonAttachment(IDS::playing, btnPlay);
+
 	btnPlay.setButtonText(UNICON::play);
 	btnPlay.setClickingTogglesState(true);
 	btnPlay.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::green);
@@ -78,9 +72,6 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	btnPlay.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::white);
 	btnPlay.setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::green);
 	addAndMakeVisible(btnPlay);
-
-	// connect the play button to the "playing" audio parameter
-	attach_Play = transportWrapper.tree.createButtonAttachment(IDS::playing, btnPlay);
 
 	// initialize the playing setup
 	setupPlayControl(transportWrapper.host_controls_playing);
@@ -91,30 +82,30 @@ UI_Transport::~UI_Transport() {}
 
 void UI_Transport::getPosition()
 {
-	ppq = transportWrapper.getPpq();
-	
-	// Calculate the number of subdivisions per beat based on beat_duration
-	int subDivisionsPerBeat = 16 / transportWrapper.beat_duration;  // This adjusts based on beat duration
+	//ppq = transportWrapper.getPpq();
+	//
+	//// Calculate the number of subdivisions per beat based on beat_duration
+	//int subDivisionsPerBeat = 16 / transportWrapper.beat_duration;  // This adjusts based on beat duration
 
-	// Calculate the scaler for converting PPQ to beats based on beat duration
-	float quarterNotesPerBeat = 4.0f / transportWrapper.beat_duration; // Adjust beat rate based on beat duration
+	//// Calculate the scaler for converting PPQ to beats based on beat duration
+	//float quarterNotesPerBeat = 4.0f / transportWrapper.beat_duration; // Adjust beat rate based on beat duration
 
-	spinBeats.safeSetRange (1, transportWrapper.bar_length, 1);
-	spinSubdiv.safeSetRange (1, (int) subDivisionsPerBeat, 1); // recalculate range
+	//spinBeats.safeSetRange (1, transportWrapper.bar_length, 1);
+	//spinBeatDivisions.safeSetRange (1, (int) subDivisionsPerBeat, 1); // recalculate range
 
-	// convert ppq to number of total beats, based on the beat duration
-	float beatPosition = ppq / quarterNotesPerBeat;
-	int bars = 1 + ((int)beatPosition / transportWrapper.bar_length);
-	int beats = 1 + ((int) ppq % transportWrapper.bar_length);
-	int divisions = 1 + ((int) (ppq * subDivisionsPerBeat) % subDivisionsPerBeat);
-	
-	spinBars.setValue(bars);
-	spinBeats.setValue(beats);
-	spinSubdiv.setValue(divisions);
+	//// convert ppq to number of total beats, based on the beat duration
+	//float beatPosition = ppq / quarterNotesPerBeat;
+	//int bars = 1 + ((int)beatPosition / transportWrapper.bar_length);
+	//int beats = 1 + ((int) ppq % transportWrapper.bar_length);
+	//int divisions = 1 + ((int) (ppq * subDivisionsPerBeat) % subDivisionsPerBeat);
+	//
+	//spinBars.setValue(bars);
+	//spinBeats.setValue(beats);
+	//spinBeatDivisions.setValue(divisions);
 
-	spinBars.timerCallback();
-	spinBeats.timerCallback();
-	spinSubdiv.timerCallback();
+	//spinBars.timerCallback();
+	//spinBeats.timerCallback();
+	//spinBeatDivisions.timerCallback();
 }
 
 void UI_Transport::layout() {
@@ -152,7 +143,7 @@ void UI_Transport::layout() {
 	auto posArea = area.removeFromLeft(110);
 	spinBars.setBounds(posArea.removeFromLeft(50));
 	spinBeats.setBounds(posArea.removeFromLeft(30));
-	spinSubdiv.setBounds(posArea.removeFromLeft(30));
+	spinBeatDivisions.setBounds(posArea.removeFromLeft(30));
 }
 
 void UI_Transport::paint(juce::Graphics& g)
@@ -191,6 +182,29 @@ void UI_Transport::setupPlayControl(bool hostControls)
 			}
 		};
 }
+
+void UI_Transport::setupPosition(bool hostControls)
+{
+	spinBars.setEnabled(!hostControls);
+	spinBeats.setEnabled(!hostControls);
+	spinBeatDivisions.setEnabled(!hostControls);
+
+	if (hostControls)
+	{
+		spinBars.onValueChange = nullptr;
+		spinBeats.onValueChange = nullptr;
+		spinBeatDivisions.onValueChange = nullptr;
+	}
+	else
+	{
+		spinBars.onValueChange = [&]
+			{
+				// safely allow beats (i.e. transport position (bars:beats:divs) to be a range of 1 value (i.e. if there is 1 beat per bar)
+				spinBeats.safeSetRange(1, spinBars.getValue(), 1);
+			};
+	}
+}
+
 
 /// <summary>
 /// Attaches handlers to the transport wrapper or the spinner, depending on the arbiter of the tempo
@@ -235,7 +249,7 @@ void UI_Transport::setupTempoRelativeNoteDuration(bool hostControls)
 		//spinTempoDuration.onValueChange = [&]
 		//	{
 		//		// when the spinner value changes, update the tree
-		//		transportWrapper.tempo_relative_note_duration = spinTempoDuration.getValue();
+		//		transportWrapper.tempo_speed = spinTempoDuration.getValue();
 		//	};
 	}
 }
@@ -271,10 +285,14 @@ void UI_Transport::setupTimeSignature(bool hostControls)
 
 void UI_Transport::timerCallback()
 {
-	spinBarLength.timerCallback();
-	spinBeatLength.timerCallback();
-	spinTempo.timerCallback();
-	
+	//spinBarLength.timerCallback();
+	//spinBeatLength.timerCallback();
+	//spinTempo.timerCallback();
+	//
+	//spinBars.timerCallback();
+	//spinBeats.timerCallback();
+	//spinBeatDivisions.timerCallback();
+
 	getPosition();
 	// pick up changes from the host
 	//if (transportWrapper.host_controls_tempo) {

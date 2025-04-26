@@ -71,45 +71,6 @@ private:
 
     juce::Optional<PositionInfo> getPosition() const override;
 
-    template <typename TypeName>
-    void updateParameter(const juce::String& paramId, TypeName value)
-    {
-        if (auto* param = transportWrapper.tree.apvts.getParameter(paramId))
-        {
-            // for some reason, this is needed to ensure controls are populated with the correct value before they are visible in the host
-            transportWrapper.apvts.state.setProperty(juce::Identifier(paramId), value, nullptr);
-
-            // normalise the value to the range of the parameter
-            auto range = param->getNormalisableRange();
-
-            if (auto* floatParam = dynamic_cast<juce::AudioParameterFloat*>(param))
-            {
-                float normalized = range.convertTo0to1(static_cast<float>(value));
-                floatParam->setValueNotifyingHost(normalized);
-            }
-            else if (auto* intParam = dynamic_cast<juce::AudioParameterInt*>(param))
-            {
-                // Handle int type parameters
-                float normalized = range.convertTo0to1(static_cast<int>(value));
-                intParam->setValueNotifyingHost(normalized);
-            }
-            else if (auto* boolParam = dynamic_cast<juce::AudioParameterBool*>(param))
-            {
-                // Handle bool type parameters
-                boolParam->setValueNotifyingHost(static_cast<bool>(value));
-            }
-            else
-            {
-                // Optionally log if the parameter type doesn't match
-                DBG("Unsupported parameter type: " << paramId);
-            }
-        }
-        else
-        {
-            DBG("Parameter with ID " << paramId << " not found in APVTS.");
-        }
-    }
-
     void updatePosition() const;
 
     void recalculate() const;

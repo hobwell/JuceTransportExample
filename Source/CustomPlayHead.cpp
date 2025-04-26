@@ -161,7 +161,7 @@ void CustomPlayHead::synchronizeState()
         if (transportWrapper.host_controls_tempo)
         {
             // set the tempo in the transport params
-            updateParameter(IDS::tempo, nextTempo);
+            transportWrapper.updateParameter(IDS::tempo, nextTempo);
             //transportWrapper.tempo = nextTempo;
         }
     };
@@ -173,10 +173,10 @@ void CustomPlayHead::synchronizeState()
         transportWrapper.host_controls_time_signature = true;
         //updateParameter(IDS::host_controls_time_sig, true);
         // TODO - need to know if all DAWs do this:
-        //updateParameter(IDS::host_controls_tempo_relative_note_duration, true);
-        transportWrapper.host_controls_tempo_relative_note_duration = true;
-        //updateParameter(IDS::time_signature_controls_tempo_relative_note_duration, true);
-        transportWrapper.time_signature_controls_tempo_relative_note_duration = true;
+        //updateParameter(IDS::host_controls_tempo_speed, true);
+        transportWrapper.host_controls_tempo_speed = true;
+        //updateParameter(IDS::time_sig_controls_tempo_speed, true);
+        transportWrapper.time_sig_controls_tempo_speed = true;
     }
     else
     {
@@ -184,10 +184,10 @@ void CustomPlayHead::synchronizeState()
         nextTimeSig.denominator = transportWrapper.beat_duration;
         //updateParameter(IDS::host_controls_time_sig, false);
         transportWrapper.host_controls_time_signature = false;
-        updateParameter(IDS::host_controls_tempo_relative_note_duration, false);
-        transportWrapper.host_controls_tempo_relative_note_duration = false;
-        updateParameter(IDS::time_signature_controls_tempo_relative_note_duration, false);
-        transportWrapper.time_signature_controls_tempo_relative_note_duration = false;
+        transportWrapper.updateParameter(IDS::host_controls_tempo_speed, false);
+        transportWrapper.host_controls_tempo_speed = false;
+        transportWrapper.updateParameter(IDS::time_sig_controls_tempo_speed, false);
+        transportWrapper.time_sig_controls_tempo_speed = false;
     }
 
     // check if the time signature has changed
@@ -197,22 +197,22 @@ void CustomPlayHead::synchronizeState()
         timeSig.denominator = nextTimeSig.denominator;
         needsUpdate = true;
         // set the time signature in the transport params
-        updateParameter(IDS::bar_length, nextTimeSig.numerator);
+        transportWrapper.updateParameter(IDS::bar_length, nextTimeSig.numerator);
         //transportWrapper.bar_length = nextTimeSig.numerator;
-        updateParameter(IDS::beat_duration, nextTimeSig.denominator);
+        transportWrapper.updateParameter(IDS::beat_duration, nextTimeSig.denominator);
         //transportWrapper.beat_duration = nextTimeSig.denominator;
         DBG("Time Signature: " << timeSig.numerator << "/" << timeSig.denominator);
     }
 
     // check if tempo relative note duration has changed
-    if (transportWrapper.time_signature_controls_tempo_relative_note_duration)
+    if (transportWrapper.time_sig_controls_tempo_speed)
     {
         // set the tempo relative note duration based on the time signature
         nextTempoRelativeNoteDuration = 1.f / timeSig.denominator;
     }
     else
     {
-        nextTempoRelativeNoteDuration = transportWrapper.tempo_relative_note_duration;
+        nextTempoRelativeNoteDuration = transportWrapper.tempo_speed;
     }
 
     if (tempoRelativeNoteDuration != nextTempoRelativeNoteDuration)
@@ -220,8 +220,8 @@ void CustomPlayHead::synchronizeState()
         tempoRelativeNoteDuration = nextTempoRelativeNoteDuration;
         needsUpdate = true;
         // set the tempo relative note duration in the transport params
-        updateParameter(IDS::tempo_relative_note_duration, nextTempoRelativeNoteDuration);
-        //transportWrapper.tempo_relative_note_duration = nextTempoRelativeNoteDuration;
+        transportWrapper.updateParameter(IDS::tempo_speed, nextTempoRelativeNoteDuration);
+        //transportWrapper.tempo_speed = nextTempoRelativeNoteDuration;
     }
 
     // check if the host has position info (but only if the host has play control)
@@ -256,4 +256,5 @@ void CustomPlayHead::updatePosition() const
 
     // report the ppq position
     transportWrapper.setPpq(ppq); // not using a cached value for ppq as it triggers a listener chain which can cause concurrent access errors on the listener list
+    transportWrapper.setPos(ppq);
 }

@@ -10,19 +10,23 @@ public:
     UI_ChoiceSpinner(KeyValueList choices);
     ~UI_ChoiceSpinner() override = default;
 
-    void paint(juce::Graphics&) override;
+    
     void mouseDown(const juce::MouseEvent&) override;
     void mouseDrag(const juce::MouseEvent&) override;
     void valueChanged() override;
 
+    void paint(juce::Graphics&) override;
+    void resized() override;
+
     std::function<void(int)> onValueChanged;
 private:
-    KeyValueList keyValues;
     int dragStartY = 0;
     float initialValue = 0.0f;
+    KeyValueList keyValues;
+    juce::Label label;
 
     float getClosestValue(float value) const;
-    juce::String getLabelForValue(float value) const;
+    juce::String getDisplayString() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_ChoiceSpinner)
 };

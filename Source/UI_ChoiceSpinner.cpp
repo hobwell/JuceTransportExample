@@ -1,34 +1,31 @@
 #include "UI_ChoiceSpinner.h"
 
-UI_ChoiceSpinner::UI_ChoiceSpinner(KeyValueList choices)
-    : keyValues(std::move(choices))
+UI_ChoiceSpinner::UI_ChoiceSpinner(KeyValueList choices) : 
+    juce::Slider(juce::Slider::SliderStyle::RotaryVerticalDrag, juce::Slider::NoTextBox),
+    keyValues(std::move(choices))
 {
-    setSliderStyle(Slider::SliderStyle::LinearBarVertical);
-    setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+    // Label for displaying selected choice
+    label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
+    label.setInterceptsMouseClicks(false, false);
+    label.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(label);
+
     onValueChange = [this] ()
         {
             DBG("UI_ChoiceSpinner value changed: " << getValue());
         };
 }
 
-void UI_ChoiceSpinner::paint(juce::Graphics& g)
-{
-    g.fillAll(juce::Colours::transparentBlack);
-
-    auto label = getLabelForValue(getValue());
-    g.setColour(juce::Colours::white);
-    g.setFont(16.0f);
-    g.drawFittedText(label, getLocalBounds(), juce::Justification::centred, 1);
-}
-
 void UI_ChoiceSpinner::mouseDown(const juce::MouseEvent& e)
 {
     dragStartY = e.y;
     initialValue = getValue();
+    juce::Slider::mouseDown(e);
 }
 
 void UI_ChoiceSpinner::mouseDrag(const juce::MouseEvent& e)
 {
+    if (!isEnabled()) return;
     int dragDelta = dragStartY - e.y;
     int step = dragDelta / 10; // 10 pixels per step
     int currentIndex = 0;
@@ -65,9 +62,9 @@ float UI_ChoiceSpinner::getClosestValue(float value) const
     return closest;
 }
 
-juce::String UI_ChoiceSpinner::getLabelForValue(float value) const
+juce::String UI_ChoiceSpinner::getDisplayString() const
 {
-    float closest = getClosestValue(value);
+    float closest = getClosestValue(getValue());
     for (const auto& kv : keyValues)
     {
         if (std::abs(kv.second - closest) < 0.0001f)
@@ -76,7 +73,20 @@ juce::String UI_ChoiceSpinner::getLabelForValue(float value) const
     return {};
 }
 
+void UI_ChoiceSpinner::paint(juce::Graphics& g)
+{
+    // do nothing
+}
+
+void UI_ChoiceSpinner::resized()
+{
+    juce::Slider::resized();
+    label.setBounds(getLocalBounds());
+}
+
 void UI_ChoiceSpinner::valueChanged()
 {
+    // Update label text when value changes
+    label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
     juce::NullCheckedInvocation::invoke(onValueChanged, getValue());
 }

@@ -43,7 +43,7 @@ private:
     UI_Spinner spinBeatLength{ 0, juce::Justification::centred, false};
     UI_Spinner spinBars{ 0, juce::Justification::right, true };
     UI_Spinner spinBeats{ 0, juce::Justification::right, true };
-    UI_Spinner spinSubdiv{ 0, juce::Justification::right, false };
+    UI_Spinner spinBeatDivisions{ 0, juce::Justification::right, false };
     UI_Spinner spinTempo{ 0, juce::Justification::centred, false };
     UI_ChoiceSpinner spinTempoDuration;
 
@@ -54,6 +54,7 @@ private:
     void layout();
 
     void setupPlayControl(bool hostControls);
+    void setupPosition(bool hostControls);
     void setupTempo(bool hostControls);
     void setupTempoRelativeNoteDuration(bool hostControls);
     void setupTimeSignature(bool hostControls);
@@ -68,8 +69,11 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_TempoOptions;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_BarLength;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_BeatLength;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_Pos_Bar;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_Pos_Beat;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_Pos_Div;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> attach_Play;
-    
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_Transport)
 };

@@ -22,15 +22,18 @@ namespace IDS
 	const juce::String host_controls_play ("host_controls_play");
 	const juce::String host_controls_position ("host_controls_position");
 	const juce::String host_controls_tempo ("host_controls_tempo");
-	const juce::String host_controls_tempo_relative_note_duration ("host_controls_tempo_relative_note_duration");
+	const juce::String host_controls_tempo_speed ("host_controls_tempo_speed");
 	const juce::String host_controls_time_sig ("host_controls_time_sig");
 	const juce::String playing ("playing");
+	const juce::String pos_bar ("pos_bar");
+	const juce::String pos_beat ("pos_beat");
+	const juce::String pos_div ("pos_div");
 	const juce::String ppq ("ppq");
 	const juce::String rewind_flag ("rewind_flag");
 	const juce::String sample_rate ("sample_rate");
 	const juce::String tempo ("tempo");
-	const juce::String tempo_relative_note_duration ("tempo_relative_note_duration");
-	const juce::String time_signature_controls_tempo_relative_note_duration ("time_signature_controls_tempo_relative_note_duration");
+	const juce::String tempo_speed ("tempo_speed"); // tempo speed refers to the relative note duration (e.g. tempo speed = q to indicate time relative to quarter notes)
+	const juce::String time_sig_controls_tempo_speed ("time_sig_controls_tempo_speed");
 	const juce::String transport_tree ("transport_tree");
 }
 
@@ -44,16 +47,19 @@ namespace LABELS
 	const juce::String beat_duration ("Beat Duration");
 	const juce::String host_controls_play_state ("Host Controls Play");
 	const juce::String host_controls_position_state ("Host Controls Position");
-	const juce::String host_controls_tempo_relative_note_duration ("Host Controls Tempo Relative Note Duration");
+	const juce::String host_controls_tempo_speed ("Host Controls Tempo Note Duration");
 	const juce::String host_controls_tempo_state ("Host Controls Tempo");
 	const juce::String host_controls_time_signature_state ("Host Controls Time Signature");
 	const juce::String playing ("Playing");
+	const juce::String pos_bar ("POS Bar");
+	const juce::String pos_beat ("POS Beat");
+	const juce::String pos_div ("POS Div");
 	const juce::String ppq ("PPQ");
 	const juce::String rewind_flag ("Rewind Flag");
 	const juce::String sample_rate ("Sample Rate");
 	const juce::String tempo ("Tempo");
-	const juce::String tempo_relative_note_duration ("Tempo Duration");
-	const juce::String time_signature_controls_tempo_relative_note_duration("Time Signature Controls Tempo Relative Note Duration");
+	const juce::String tempo_speed ("Tempo Duration");
+	const juce::String time_sig_controls_tempo_speed("Time Signature Controls Tempo Note Duration");
 }
 
 namespace TEMPO

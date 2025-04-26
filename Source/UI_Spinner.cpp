@@ -16,14 +16,14 @@ UI_Spinner::UI_Spinner(int numDecimalsToDisplay, juce::Justification align = juc
     setNumDecimalPlacesToDisplay(numDecimalsToDisplay);
     permanentDecimal = alwaysShowDecimal;
 
-    label.setText(getDisplayString(getValue()), juce::NotificationType::dontSendNotification);
+    label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
     label.setInterceptsMouseClicks(false, false);
     label.setJustificationType(align);
     addAndMakeVisible(label);
-    onValueChange = [this] ()
+    /*onValueChange = [this] ()
         {
             DBG("UI_Spinner value changed: " << getValue());
-        };
+        };*/
 }
 
 UI_Spinner::~UI_Spinner() {}
@@ -37,11 +37,11 @@ UI_Spinner::~UI_Spinner() {}
 /// there are overloads for the parameter to provide a string converter for it, but we can't know what conversion function we 
 /// want (based on the transport) until after the parameters have been initialized, so we'll use a local function to handle it.
 /// </remarks>
-juce::String UI_Spinner::getDisplayString(const double value)
+juce::String UI_Spinner::getDisplayString()
 {
     std::stringstream ss;
 
-    ss << std::fixed << std::setprecision(getNumDecimalPlacesToDisplay()) << value;
+    ss << std::fixed << std::setprecision(getNumDecimalPlacesToDisplay()) << getValue();
     if (permanentDecimal && getNumDecimalPlacesToDisplay() == 0)
     {
         ss << ".";
@@ -78,40 +78,39 @@ void UI_Spinner::safeSetRange(double min, double max, double interval)
     {
         max = min + 1;
         setValue(min);
-        setEnabled(false);
+        setLocked(true);
     }
     else
     {
-        setEnabled(true);
+        setLocked(false);
     }
 
     Slider::setRange(min, max, interval);
 }
 
-void UI_Spinner::setValue(float newValue, juce::NotificationType notificationType)
+void UI_Spinner::setLocked(bool locked)
 {
-    waitingNotificationType = notificationType;
-    waitingValue = newValue;
-    awaitingChange = true;
-}
-
-void UI_Spinner::timerCallback()
-{
-    updateGui();
-}
-
-void UI_Spinner::updateGui()
-{
-    if (awaitingChange)
+    this->wasEnabled = isEnabled() == true;
+    this->locked = locked;
+    if (wasEnabled)
     {
-        juce::Slider::setValue(waitingValue, waitingNotificationType);
-        label.setText(getDisplayString(getValue()), waitingNotificationType);
-        awaitingChange = false;
+        if (locked)
+        {
+            setEnabled(false);
+        }
+        else
+        {
+            setEnabled(true);
+        }
+    }
+    else
+    {
+        setEnabled(false);
     }
 }
 
 void UI_Spinner::valueChanged()
 {
-    label.setText(getDisplayString(getValue()), juce::NotificationType::dontSendNotification);
+    label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
     juce::NullCheckedInvocation::invoke(onValueChanged, getValue());
 }

@@ -1,39 +1,74 @@
 /*
   ==============================================================================
 
-	AVPTSWrapper.cpp
-	Created: 14 Oct 2024 2:52:50pm
-	Author:  Nicholas
+    AVPTSWrapper.cpp
+    Created: 14 Oct 2024 2:52:50pm
+    Author:  Nicholas
 
   ==============================================================================
 */
 
 #include "APVTSWrapper.h"
-#include "SyncedAudioParameterFloat.h"
 
 ApvtsWrapper::ApvtsWrapper(TransportTree* transport_tree, juce::UndoManager* undoManager) :
-	tree(*transport_tree),
-	apvts(transport_tree->apvts),
-	undoManager(undoManager)
+    tree(*transport_tree),
+    apvts(transport_tree->apvts),
+    undoManager(undoManager)
 {
-	apvts.state.addListener(this);
+    apvts.state.addListener(this);
+    startTimerHz(30);
 }
 
 ApvtsWrapper::~ApvtsWrapper()
 {
-	apvts.state.removeListener(this);
+    apvts.state.removeListener(this);
+}
+
+void ApvtsWrapper::flushPendingUpdates()
+{
+    std::unordered_map<juce::String, std::function<void()>> updatesToApply;
+
+    {
+        juce::SpinLock::ScopedLockType lock(pendingUpdatesLock);
+        updatesToApply = std::move(pendingUpdates);
+        pendingUpdates.clear();
+    }
+
+    for (auto& [paramId, updater] : updatesToApply)
+        updater(); // safely call them OUTSIDE the lock
 }
 
 float ApvtsWrapper::getPpq()
 {
-	return *apvts.getRawParameterValue(IDS::ppq);
+    return *apvts.getRawParameterValue(IDS::ppq);
 }
 
 void ApvtsWrapper::setPpq(float ppq)
 {
-	apvts.getRawParameterValue(IDS::ppq)->store(ppq);
+    apvts.getRawParameterValue(IDS::ppq)->store(ppq);
 }
 
+void ApvtsWrapper::setPos(float ppq)
+{
+    // Calculate the number of subdivisions per beat based on beat_duration
+    int subDivisionsPerBeat = 16 / beat_duration;  // This adjusts based on beat duration
+
+    // Calculate the scaler for converting PPQ to beats based on beat duration
+    float quarterNotesPerBeat = 4.0f / beat_duration; // Adjust beat rate based on beat duration
+
+    // convert ppq to number of total beats, based on the beat duration
+    float beatPosition = ppq / quarterNotesPerBeat;
+
+    updateParameter(IDS::pos_bar, 1 + ((int) beatPosition / bar_length));
+    updateParameter(IDS::pos_beat, 1 + ((int) beatPosition % bar_length));
+    updateParameter(IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat));
+}
+
+void ApvtsWrapper::timerCallback()
+{
+    // flush any pending updates
+    flushPendingUpdates();
+}
 
 /// <summary>
 /// Respond to changes in the APVTS
@@ -45,12 +80,8 @@ void ApvtsWrapper::setPpq(float ppq)
 /// </remarks>
 void ApvtsWrapper::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property)
 {
-	if (treeWhosePropertyHasChanged == apvts.state)
-	{
+    if (treeWhosePropertyHasChanged == apvts.state)
+    {
         DBG("Property changed: " << property.toString() << " = " << apvts.state.getProperty(property).toString());
-		if (property == juce::Identifier(IDS::tempo_relative_note_duration))
-		{
-			
-		}
-	}
+    }
 }
