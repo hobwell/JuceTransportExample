@@ -23,9 +23,12 @@ public:
     UI_Spinner(int numDecimalsToDisplay, juce::Justification align, bool alwaysShowDecimal);
     ~UI_Spinner() override;
 
+    int displayPrecision = 0; // number of decimal places to display
+
     bool permanentDecimal = false; // indicates whether the decimal should always be shown (even when there are no decimlal places being displayed)
 
     void mouseDown(const juce::MouseEvent& event) override;
+    void mouseDrag(const juce::MouseEvent& event) override;
     void mouseUp(const juce::MouseEvent& event) override;
     void paint(juce::Graphics&) override;
     void resized() override;
@@ -36,13 +39,22 @@ public:
 
     std::function<void(int)> onValueChanged;
 
+    juce::String getDisplayString();
+
 private:
     juce::Label label;
+    int dragStartY = 0;
+    juce::Time lastDragTime;
+    int lastDragY = 0;
+    bool isAdjustingDecimal;
+    float initialValue = 0.0f;
     bool locked = false; // to handle when the range is a single value - we need to enhance isEnabled() with this
     bool wasEnabled = true; // to handle when the range is a single value - we need to enhance isEnabled() with this
     juce::NotificationType waitingNotificationType = juce::NotificationType::dontSendNotification;
 
-    juce::String getDisplayString();
+    float getDigitMultiplier(const juce::String& str, int index);
+
+    juce::String getTextFromValue(double value) override;
 
     void setLocked(bool locked);
 

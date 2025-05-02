@@ -44,7 +44,7 @@ private:
     UI_Spinner spinBars{ 0, juce::Justification::right, true };
     UI_Spinner spinBeats{ 0, juce::Justification::right, true };
     UI_Spinner spinBeatDivisions{ 0, juce::Justification::right, false };
-    UI_Spinner spinTempo{ 0, juce::Justification::centred, false };
+    UI_Spinner spinTempo{ 2, juce::Justification::centred, true };
     UI_ChoiceSpinner spinTempoDuration;
 
     ApvtsWrapper& transportWrapper;

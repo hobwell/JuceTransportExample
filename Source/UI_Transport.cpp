@@ -16,17 +16,14 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	transportWrapper(transportWrapper),
     spinTempoDuration(TEMPO::duration_options)
 {
-	// connect the tempo slider to the "tempo" audio parameter
-	// this will adjust the slider's range to match the parameter's range - it's also supposed to bind the UI value to the parameter value, but it doesn't seem to do that for some reason
+	// connect sliders to audio parameters
+	// this will adjust the slider's range to match the parameter's range
 	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
+	// make control visible
 	addAndMakeVisible(spinTempo);
 
 	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_speed, spinTempoDuration);
     addAndMakeVisible(spinTempoDuration);
-
-	// if the arbiter of the tempo changes, re-initialize the tempo setup
-	setupTempo(transportWrapper.host_controls_tempo);
-    setupTempoRelativeNoteDuration(transportWrapper.host_controls_tempo_speed);
 
 	attach_BarLength = transportWrapper.tree.createSliderAttachment(IDS::bar_length, spinBarLength);
 	addAndMakeVisible(spinBarLength);
@@ -37,8 +34,6 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	attach_BeatLength = transportWrapper.tree.createSliderAttachment(IDS::beat_duration, spinBeatLength);
 	addAndMakeVisible(spinBeatLength);
 
-	setupTimeSignature(transportWrapper.host_controls_time_signature);
-
 	attach_Pos_Bar = transportWrapper.tree.createSliderAttachment(IDS::pos_bar, spinBars);
 	addAndMakeVisible(spinBars);
 
@@ -48,6 +43,13 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	attach_Pos_Div = transportWrapper.tree.createSliderAttachment(IDS::pos_div, spinBeatDivisions);
 	addAndMakeVisible(spinBeatDivisions);
 
+
+	// setup handlers, after all parameters have been attached
+	
+	// if the arbiter of the tempo changes, re-initialize the tempo setup
+	setupTempo(transportWrapper.host_controls_tempo);
+	setupTempoRelativeNoteDuration(transportWrapper.host_controls_tempo_speed);
+	setupTimeSignature(transportWrapper.host_controls_time_signature);
 	setupPosition(transportWrapper.host_controls_position);
 
 	btnRewind.setButtonText(UNICON::rewind);
@@ -188,21 +190,6 @@ void UI_Transport::setupPosition(bool hostControls)
 	spinBars.setEnabled(!hostControls);
 	spinBeats.setEnabled(!hostControls);
 	spinBeatDivisions.setEnabled(!hostControls);
-
-	if (hostControls)
-	{
-		spinBars.onValueChange = nullptr;
-		spinBeats.onValueChange = nullptr;
-		spinBeatDivisions.onValueChange = nullptr;
-	}
-	else
-	{
-		spinBars.onValueChange = [&]
-			{
-				// safely allow beats (i.e. transport position (bars:beats:divs) to be a range of 1 value (i.e. if there is 1 beat per bar)
-				spinBeats.safeSetRange(1, spinBars.getValue(), 1);
-			};
-	}
 }
 
 
@@ -270,16 +257,6 @@ void UI_Transport::setupTimeSignature(bool hostControls)
 	else {
 		spinBarLength.setEnabled(true);
 		spinBeatLength.setEnabled(true);
-		spinBarLength.onValueChange = nullptr;
-		//spinBarLength.onValueChange = [&]
-		//	{
-		//		transportWrapper.bar_length = spinBarLength.getValue();
-		//	};
-		spinBeatLength.onValueChange = nullptr;
-		//spinBeatLength.onValueChange = [&]
-		//	{
-		//		transportWrapper.beat_duration = spinBeatLength.getValue();
-		//	};
 	}
 }
 

@@ -61,6 +61,8 @@ void ApvtsWrapper::setPos(float ppq)
 
     updateParameter(IDS::pos_bar, 1 + ((int) beatPosition / bar_length));
     updateParameter(IDS::pos_beat, 1 + ((int) beatPosition % bar_length));
+    DBG("Value: " << (int) beatPosition % bar_length);
+    DBG("Tree : " << apvts.getRawParameterValue(IDS::pos_beat)->load());
     updateParameter(IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat));
 }
 
@@ -80,8 +82,28 @@ void ApvtsWrapper::timerCallback()
 /// </remarks>
 void ApvtsWrapper::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property)
 {
+
+    // When parameters are changed by attachments, the value tree is not automatically update, so we have to manually sync the values.
+    if (treeWhosePropertyHasChanged.hasType("PARAM") && property == juce::Identifier("value"))
+    {
+        const auto changePropertyId = treeWhosePropertyHasChanged.getProperty("id");
+
+        if (!changePropertyId.isString())
+            return;
+
+        const auto paramId = juce::Identifier(changePropertyId.toString());
+        const auto newValue = treeWhosePropertyHasChanged.getProperty("value");
+
+        if (apvts.state.getProperty(paramId) != newValue)
+        {
+            apvts.state.setProperty(paramId, newValue, nullptr);
+            // DBG("Synced param '" << paramId.toString() << "' to transport_tree: " << newValue.toString());
+        }
+    }
+
     if (treeWhosePropertyHasChanged == apvts.state)
     {
-        DBG("Property changed: " << property.toString() << " = " << apvts.state.getProperty(property).toString());
+        // DBG("Property changed: " << property.toString() << " = " << apvts.state.getProperty(property).toString());
     }
 }
+
