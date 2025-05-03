@@ -74,120 +74,128 @@ void UI_Spinner::mouseDown(const juce::MouseEvent& e)
 {
     label.setLookAndFeel(&lookAndFeel.active);
 
-    dragStartY = e.y;
-    initialValue = getValue();
-    lastDragTime = juce::Time::getCurrentTime();
-    lastDragY = e.y;
-
-    // Get the string that would be displayed (e.g., "123.45")
-    auto displayString = getDisplayString();
-
-    // Get the font and prepare the layout
-    auto font = getLookAndFeel().getSliderPopupFont(*this);
-    juce::GlyphArrangement ga;
-    ga.addJustifiedText(font, displayString, 0.0f, 0.0f, (float) getWidth(), juce::Justification::centred);
-
-    // Find the x-position of the decimal point
-    float decimalX = -1.0f;
-    for (int i = 0; i < ga.getNumGlyphs(); ++i)
+    if (isEnabled())
     {
-        auto g = ga.getGlyph(i);
-        auto c = displayString[i];
+        dragStartY = e.y;
+        initialValue = getValue();
+        lastDragTime = juce::Time::getCurrentTime();
+        lastDragY = e.y;
 
-        if (c == '.')
+        // Get the string that would be displayed (e.g., "123.45")
+        auto displayString = getDisplayString();
+
+        // Get the font and prepare the layout
+        auto font = getLookAndFeel().getSliderPopupFont(*this);
+        juce::GlyphArrangement ga;
+        ga.addJustifiedText(font, displayString, 0.0f, 0.0f, (float) getWidth(), juce::Justification::centred);
+
+        // Find the x-position of the decimal point
+        float decimalX = -1.0f;
+        for (int i = 0; i < ga.getNumGlyphs(); ++i)
         {
-            decimalX = g.getBounds().getX();
-            break;
+            auto g = ga.getGlyph(i);
+            auto c = displayString[i];
+
+            if (c == '.')
+            {
+                decimalX = g.getBounds().getX();
+                break;
+            }
+        }
+
+        // If decimal found, compare click position to it
+        if (decimalX >= 0.0f)
+        {
+            isAdjustingDecimal = (e.x > decimalX);
+        }
+        else
+        {
+            // No decimal — default to whole
+            isAdjustingDecimal = false;
         }
     }
-
-    // If decimal found, compare click position to it
-    if (decimalX >= 0.0f)
-    {
-        isAdjustingDecimal = (e.x > decimalX);
-    }
-    else
-    {
-        // No decimal — default to whole
-        isAdjustingDecimal = false;
-    }
-
     juce::Slider::mouseDown(e);
 }
 
 
 void UI_Spinner::mouseDrag(const juce::MouseEvent& e)
 {
-    const auto currentY = e.y;
-    const auto currentTime = juce::Time::getCurrentTime();
-
-    // Pixel movement since last drag
-    int pixelDelta = std::abs(currentY - lastDragY);
-
-    wasDragging = pixelDelta >= 2;
-
-    // Time since last drag in milliseconds
-    int timeDeltaMs = (int) (currentTime.toMilliseconds() - lastDragTime.toMilliseconds());
-
-    // Thresholds
-    const int movementThreshold = 5;
-    const int timeThresholdMs = 50;
-
-    // Step sizes
-    const float fineStep = 1.f;
-    const float coarseStep = 5.f;
-
-    float speed = (float) pixelDelta / (float) timeDeltaMs;
-    float speedThreshold = 0.1f;
-
-    float step = 0.0f;
-
-    // DBG("Time: " << timeDeltaMs << "  Pixels: " << pixelDelta << "  Speed: " << speed);
-
-    // Only apply step if enough pixels have been moved
-    if (pixelDelta >= movementThreshold && speed > speedThreshold)
+    if (isEnabled())
     {
-        step = coarseStep;
-        // DBG("Coarse: " << pixelDelta);
+        const auto currentY = e.y;
+        const auto currentTime = juce::Time::getCurrentTime();
+
+        // Pixel movement since last drag
+        int pixelDelta = std::abs(currentY - lastDragY);
+
+        wasDragging = pixelDelta >= 2;
+
+        // Time since last drag in milliseconds
+        int timeDeltaMs = (int) (currentTime.toMilliseconds() - lastDragTime.toMilliseconds());
+
+        // Thresholds
+        const int movementThreshold = 5;
+        const int timeThresholdMs = 50;
+
+        // Step sizes
+        const float fineStep = 1.f;
+        const float coarseStep = 5.f;
+
+        float speed = (float) pixelDelta / (float) timeDeltaMs;
+        float speedThreshold = 0.1f;
+
+        float step = 0.0f;
+
+        // DBG("Time: " << timeDeltaMs << "  Pixels: " << pixelDelta << "  Speed: " << speed);
+
+        // Only apply step if enough pixels have been moved
+        if (pixelDelta >= movementThreshold && speed > speedThreshold)
+        {
+            step = coarseStep;
+            // DBG("Coarse: " << pixelDelta);
+        }
+        else if (pixelDelta >= movementThreshold)
+        {
+            step = fineStep;
+            // DBG("Fine adjustment: " << pixelDelta);
+        }
+        else
+        {
+            // Not enough movement for even a fine adjustment
+            // DBG("No adjustment: " << pixelDelta);
+            return;
+        }
+
+        if (isAdjustingDecimal)
+        {
+            step *= 0.01f;
+        }
+
+        step /= movementThreshold;
+
+        float newValue = getValue() - (currentY - lastDragY) * step;
+
+        setValue(newValue, juce::sendNotificationAsync);
+
+        lastDragTime = currentTime;
+        lastDragY = currentY;
     }
-    else if (pixelDelta >= movementThreshold)
-    {
-        step = fineStep;
-        // DBG("Fine adjustment: " << pixelDelta);
-    }
-    else
-    {
-        // Not enough movement for even a fine adjustment
-        // DBG("No adjustment: " << pixelDelta);
-        return;
-    }
-
-    if (isAdjustingDecimal)
-    {
-        step *= 0.01f;
-    }
-
-    step /= movementThreshold;
-
-    float newValue = getValue() - (currentY - lastDragY) * step;
-
-    setValue(newValue, juce::sendNotificationAsync);
-
-    lastDragTime = currentTime;
-    lastDragY = currentY;
 }
 
 void UI_Spinner::mouseUp(const juce::MouseEvent& e)
 {
     juce::Slider::mouseUp(e);
 
-    if (!wasDragging)
+    if (isEnabled())
     {
-        label.showEditor();
-        if (auto* editor = label.getCurrentTextEditor())
+        if (!wasDragging)
         {
-            editor->setJustification(juce::Justification::centred);
-            editor->setLookAndFeel(&lookAndFeel.active);
+            label.showEditor();
+            if (auto* editor = label.getCurrentTextEditor())
+            {
+                editor->setJustification(juce::Justification::centred);
+                editor->setLookAndFeel(&lookAndFeel.active);
+            }
         }
     }
 
