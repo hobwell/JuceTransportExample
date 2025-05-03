@@ -15,6 +15,7 @@
 #include "UI_ChoiceSpinner.h"
 #include "TransportTree.h"
 #include "APVTSWrapper.h"
+#include "FontAwesome_LookAndFeel.h"
 
 /// <summary>
 /// Basic playback, tempo and time signature and position control - disabled when controlled by a host
@@ -31,9 +32,7 @@ public:
     void resized() override;
     void timerCallback();
 private:
-    static const juce::String stopIcon;
-    static const juce::String playIcon;
-    static const juce::String rewindIcon;
+    FontAwesome_LookAndFeel fontAwesome;
 
     bool initialized = false;
     float ppq = 0.f;

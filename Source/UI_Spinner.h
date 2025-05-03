@@ -12,51 +12,47 @@
 
 #include <JuceHeader.h>
 #include "TransportTree.h"
+#include "Spinner_LookAndFeel.h"
 
 /// <summary>
 /// A MAX style number box that allows the user to click and drag to change the value of a parameter.
 /// </summary>
 // TODO: Make a better spinner...
-class UI_Spinner : public juce::Slider
+class UI_Spinner : 
+    public juce::Slider
 {
 public:
     UI_Spinner(int numDecimalsToDisplay, juce::Justification align, bool alwaysShowDecimal);
     ~UI_Spinner() override;
-
-    int displayPrecision = 0; // number of decimal places to display
-
-    bool permanentDecimal = false; // indicates whether the decimal should always be shown (even when there are no decimlal places being displayed)
 
     void mouseDown(const juce::MouseEvent& event) override;
     void mouseDrag(const juce::MouseEvent& event) override;
     void mouseUp(const juce::MouseEvent& event) override;
     void paint(juce::Graphics&) override;
     void resized() override;
-    //void setValue(float newValue, juce::NotificationType notification = juce::NotificationType::sendNotificationAsync);
     void valueChanged() override;
-
-    void safeSetRange(double newMin, double newMax, double newInterval);
-
     std::function<void(int)> onValueChanged;
 
-    juce::String getDisplayString();
-
+    void safeSetRange(double newMin, double newMax, double newInterval);
+    void setAttachedParameter(juce::RangedAudioParameter*);
 private:
-    juce::Label label;
+    juce::AudioParameterFloat* attachedParameter = nullptr;
+    int displayPrecision = 0; // number of decimal places to display
+    bool wasDragging = false;
     int dragStartY = 0;
     juce::Time lastDragTime;
     int lastDragY = 0;
     bool isAdjustingDecimal;
     float initialValue = 0.0f;
-    bool locked = false; // to handle when the range is a single value - we need to enhance isEnabled() with this
+    juce::Label label;
+    bool permanentDecimal = false; // indicates whether the decimal should always be shown (even when there are no decimlal places being displayed)
+    Spinner_LookAndFeel lookAndFeel;
     bool wasEnabled = true; // to handle when the range is a single value - we need to enhance isEnabled() with this
     juce::NotificationType waitingNotificationType = juce::NotificationType::dontSendNotification;
 
-    float getDigitMultiplier(const juce::String& str, int index);
-
+    juce::String getDisplayString();
     juce::String getTextFromValue(double value) override;
-
     void setLocked(bool locked);
-
+    bool valueIsInRange(float value);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_Spinner)
 };

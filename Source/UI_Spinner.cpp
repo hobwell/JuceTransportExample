@@ -11,18 +11,47 @@
 #include <JuceHeader.h>
 #include "UI_Spinner.h"
 
-UI_Spinner::UI_Spinner(int numDecimalsToDisplay, juce::Justification align = juce::Justification::centred, bool alwaysShowDecimal = false) : 
+UI_Spinner::UI_Spinner(int numDecimalsToDisplay, juce::Justification align = juce::Justification::centred, bool alwaysShowDecimal = false) :
     juce::Slider(juce::Slider::SliderStyle::RotaryVerticalDrag, juce::Slider::NoTextBox),
     displayPrecision(numDecimalsToDisplay),
     permanentDecimal(alwaysShowDecimal)
 {
+    label.setLookAndFeel(&lookAndFeel.inactive);
     label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
     label.setInterceptsMouseClicks(false, false);
     label.setJustificationType(align);
+    label.onTextChange = [this] ()
+        {
+            double newValue = label.getText().getDoubleValue();
+            if (valueIsInRange(newValue))
+            {
+                setValue(newValue, juce::sendNotification);
+            }
+            label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
+        };
+    label.onEditorHide = [this] ()
+        {
+            label.setLookAndFeel(&lookAndFeel.inactive);
+        };
+    label.onEditorShow = [this] ()
+        {
+            if (auto* editor = label.getCurrentTextEditor())
+            {
+                editor->setInputRestrictions(0, "0123456789.");
+                editor->setJustification(juce::Justification::centred);
+                editor->setLookAndFeel(&lookAndFeel.active);
+                label.setLookAndFeel(&lookAndFeel.active);
+            }
+        };
+
     addAndMakeVisible(label);
 }
 
-UI_Spinner::~UI_Spinner() {}
+UI_Spinner::~UI_Spinner()
+{
+    attachedParameter = nullptr;
+    label.setLookAndFeel(nullptr);
+}
 
 juce::String UI_Spinner::getDisplayString()
 {
@@ -43,6 +72,8 @@ juce::String UI_Spinner::getTextFromValue(double value)
 
 void UI_Spinner::mouseDown(const juce::MouseEvent& e)
 {
+    label.setLookAndFeel(&lookAndFeel.active);
+
     dragStartY = e.y;
     initialValue = getValue();
     lastDragTime = juce::Time::getCurrentTime();
@@ -93,6 +124,8 @@ void UI_Spinner::mouseDrag(const juce::MouseEvent& e)
     // Pixel movement since last drag
     int pixelDelta = std::abs(currentY - lastDragY);
 
+    wasDragging = pixelDelta >= 2;
+
     // Time since last drag in milliseconds
     int timeDeltaMs = (int) (currentTime.toMilliseconds() - lastDragTime.toMilliseconds());
 
@@ -109,18 +142,18 @@ void UI_Spinner::mouseDrag(const juce::MouseEvent& e)
 
     float step = 0.0f;
 
-    DBG("Time: " << timeDeltaMs << "  Pixels: " << pixelDelta <<"  Speed: " << speed);
+    // DBG("Time: " << timeDeltaMs << "  Pixels: " << pixelDelta << "  Speed: " << speed);
 
     // Only apply step if enough pixels have been moved
     if (pixelDelta >= movementThreshold && speed > speedThreshold)
     {
         step = coarseStep;
-        DBG("Coarse: " << pixelDelta);
+        // DBG("Coarse: " << pixelDelta);
     }
     else if (pixelDelta >= movementThreshold)
     {
         step = fineStep;
-        DBG("Fine adjustment: " << pixelDelta);
+        // DBG("Fine adjustment: " << pixelDelta);
     }
     else
     {
@@ -147,6 +180,20 @@ void UI_Spinner::mouseDrag(const juce::MouseEvent& e)
 void UI_Spinner::mouseUp(const juce::MouseEvent& e)
 {
     juce::Slider::mouseUp(e);
+
+    if (!wasDragging)
+    {
+        label.showEditor();
+        if (auto* editor = label.getCurrentTextEditor())
+        {
+            editor->setJustification(juce::Justification::centred);
+            editor->setLookAndFeel(&lookAndFeel.active);
+        }
+    }
+
+    label.setLookAndFeel(&lookAndFeel.inactive);
+
+    wasDragging = false;
 }
 
 void UI_Spinner::paint(juce::Graphics& g)
@@ -176,24 +223,21 @@ void UI_Spinner::safeSetRange(double min, double max, double interval)
     Slider::setRange(min, max, interval);
 }
 
-void UI_Spinner::setLocked(bool locked)
+void UI_Spinner::setAttachedParameter(juce::RangedAudioParameter* param)
 {
-    this->wasEnabled = isEnabled() == true;
-    this->locked = locked;
-    if (wasEnabled)
+    attachedParameter = dynamic_cast<juce::AudioParameterFloat*>(param);
+}
+
+void UI_Spinner::setLocked(bool lock)
+{
+    if (lock)
     {
-        if (locked)
-        {
-            setEnabled(false);
-        }
-        else
-        {
-            setEnabled(true);
-        }
+        wasEnabled = isEnabled() == true;
+        setEnabled(false);
     }
     else
     {
-        setEnabled(false);
+        setEnabled(wasEnabled);
     }
 }
 
@@ -201,4 +245,10 @@ void UI_Spinner::valueChanged()
 {
     label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
     juce::NullCheckedInvocation::invoke(onValueChanged, getValue());
+}
+
+bool UI_Spinner::valueIsInRange(float value)
+{
+    auto range = attachedParameter->range;
+    return (value >= range.start && value <= range.end);
 }

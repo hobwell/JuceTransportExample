@@ -6,6 +6,22 @@
               pluginVST3Category="Fx,Instrument">
   <MAINGROUP id="fZovay" name="TransportExample">
     <GROUP id="{129D21EF-3F97-D802-59A5-B8AE91C5E69A}" name="Source">
+      <GROUP id="{82849CBE-762A-60A7-BDAB-A4F5E3EFA14F}" name="LookAndFeel">
+        <FILE id="z50wAM" name="FontAwesome_LookAndFeel.cpp" compile="1" resource="0"
+              file="Source/FontAwesome_LookAndFeel.cpp"/>
+        <FILE id="tfcD5U" name="FontAwesome_LookAndFeel.h" compile="0" resource="0"
+              file="Source/FontAwesome_LookAndFeel.h"/>
+        <FILE id="uP3xkY" name="Fonts.cpp" compile="1" resource="0" file="Source/Fonts.cpp"/>
+        <FILE id="e2qZeU" name="Fonts.h" compile="0" resource="0" file="Source/Fonts.h"/>
+        <FILE id="ZDaw1E" name="Spinner_LookAndFeel.cpp" compile="1" resource="0"
+              file="Source/Spinner_LookAndFeel.cpp"/>
+        <FILE id="BD700y" name="Spinner_LookAndFeel.h" compile="0" resource="0"
+              file="Source/Spinner_LookAndFeel.h"/>
+      </GROUP>
+      <GROUP id="{892989D2-E0EB-B008-1F68-4904E7687138}" name="Resources">
+        <FILE id="DLrjpW" name="FA6FreeSolid.otf" compile="0" resource="1"
+              file="Resources/FA6FreeSolid.otf"/>
+      </GROUP>
       <GROUP id="{C08C3F86-D22A-BA2C-C3BD-9D425FB8C1BC}" name="Constants">
         <FILE id="Bdjvqq" name="StringConstants.h" compile="0" resource="0"
               file="Source/StringConstants.h"/>

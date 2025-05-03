@@ -19,11 +19,13 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	// connect sliders to audio parameters
 	// this will adjust the slider's range to match the parameter's range
 	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
+    // let the slider know that it is attached to a parameter
+    spinTempo.setAttachedParameter(transportWrapper.apvts.getParameter(IDS::tempo));
 	// make control visible
 	addAndMakeVisible(spinTempo);
 
 	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_speed, spinTempoDuration);
-    addAndMakeVisible(spinTempoDuration);
+	addAndMakeVisible(spinTempoDuration);
 
 	attach_BarLength = transportWrapper.tree.createSliderAttachment(IDS::bar_length, spinBarLength);
 	addAndMakeVisible(spinBarLength);
@@ -52,7 +54,8 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	setupTimeSignature(transportWrapper.host_controls_time_signature);
 	setupPosition(transportWrapper.host_controls_position);
 
-	btnRewind.setButtonText(UNICON::rewind);
+	btnRewind.setLookAndFeel(&fontAwesome);
+	btnRewind.setButtonText(fontAwesome.icon_backward);
 	btnRewind.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::orange);
 	btnRewind.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
 	btnRewind.setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::white);
@@ -67,7 +70,8 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	// connect the play button to the "playing" audio parameter
 	attach_Play = transportWrapper.tree.createButtonAttachment(IDS::playing, btnPlay);
 
-	btnPlay.setButtonText(UNICON::play);
+	btnPlay.setLookAndFeel(&fontAwesome);
+	btnPlay.setButtonText(fontAwesome.icon_play);
 	btnPlay.setClickingTogglesState(true);
 	btnPlay.setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::green);
 	btnPlay.setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
@@ -173,10 +177,10 @@ void UI_Transport::setupPlayControl(bool hostControls)
 		{
 			// Interestingly, this gets called when the attached parameter changes even if the button is not clicked and even if the button is disabled
 			if (btnPlay.getToggleState()) {
-				btnPlay.setButtonText(UNICON::stop);
+				btnPlay.setButtonText(fontAwesome.icon_stop);
 			}
 			else {
-				btnPlay.setButtonText(UNICON::play);
+				btnPlay.setButtonText(fontAwesome.icon_play);
 			}
 			if (!this->transportWrapper.host_controls_playing) {
 				// also set the transport playing state
