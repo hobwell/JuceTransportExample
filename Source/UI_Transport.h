@@ -16,6 +16,7 @@
 #include "TransportTree.h"
 #include "APVTSWrapper.h"
 #include "FontAwesome_LookAndFeel.h"
+#include "UI_TransportTimeline.h"
 
 /// <summary>
 /// Basic playback, tempo and time signature and position control - disabled when controlled by a host
@@ -30,7 +31,6 @@ public:
 
     void paint(juce::Graphics&) override;
     void resized() override;
-    void timerCallback();
 private:
     FontAwesome_LookAndFeel fontAwesome;
 
@@ -38,13 +38,14 @@ private:
     float ppq = 0.f;
 
     juce::Label lblTimeSigSep;
+    UI_ChoiceSpinner spinTempoDuration;
     UI_Spinner spinBarLength{ 0, juce::Justification::centred, false };
     UI_Spinner spinBeatLength{ 0, juce::Justification::centred, false};
     UI_Spinner spinBars{ 0, juce::Justification::right, true };
     UI_Spinner spinBeats{ 0, juce::Justification::right, true };
     UI_Spinner spinBeatDivisions{ 0, juce::Justification::right, false };
     UI_Spinner spinTempo{ 2, juce::Justification::centred, true };
-    UI_ChoiceSpinner spinTempoDuration;
+    UI_TransportTimeline transportTimeline;
 
     ApvtsWrapper& transportWrapper;
 
@@ -58,8 +59,6 @@ private:
     void setupTempoRelativeNoteDuration(bool hostControls);
     void setupTimeSignature(bool hostControls);
 
-    void getPosition();
-
     juce::TextButton btnPlay;
     juce::TextButton btnRewind;
 
@@ -72,7 +71,10 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_Pos_Beat;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach_Pos_Div;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> attach_Play;
-
+    std::unique_ptr<GenericComponentAttachment> attach_Timeline_playing;
+    std::unique_ptr<GenericComponentAttachment> attach_Timeline_ppq;
+    std::unique_ptr<GenericComponentAttachment> attach_Timeline_barLength;
+    std::unique_ptr<GenericComponentAttachment> attach_Timeline_beatDuration;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_Transport)
 };

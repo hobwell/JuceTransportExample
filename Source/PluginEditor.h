@@ -15,19 +15,18 @@
 //==============================================================================
 /**
 */
-class TransportExampleAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
+class TransportExampleAudioProcessorEditor : public juce::AudioProcessorEditor
 {
 public:
 	TransportExampleAudioProcessorEditor(TransportExampleAudioProcessor&);
 	~TransportExampleAudioProcessorEditor() override;
 
 	//==============================================================================
-	int height = 50;
+	int height = 75;
 	int width = 660;
 
 	void paint(juce::Graphics&) override;
 	void resized() override;
-	void timerCallback() override;
 private:
 	/// <summary>
 	/// Component containing the user interface

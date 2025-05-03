@@ -45,6 +45,31 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	attach_Pos_Div = transportWrapper.tree.createSliderAttachment(IDS::pos_div, spinBeatDivisions);
 	addAndMakeVisible(spinBeatDivisions);
 
+	attach_Timeline_ppq = transportWrapper.tree.createGenericAttachment(
+		IDS::ppq,
+		transportTimeline,
+		[&] (float ppq) { transportTimeline.setTransportPosition(ppq); },
+		[&] (std::function<void(float)> f) { /* TODO: when the timeline is reposition, update ppq */ }
+	);
+	attach_Timeline_playing = transportWrapper.tree.createGenericAttachment(
+		IDS::playing,
+		transportTimeline,
+		[&] (bool playing) { transportTimeline.setPlaying(playing); },
+		[] (std::function<void(float)>) {}  // Explicitly does nothing
+	);
+	attach_Timeline_barLength = transportWrapper.tree.createGenericAttachment(
+		IDS::bar_length,
+		transportTimeline,
+		[&] (int barLength) { transportTimeline.setBarLength(barLength); },
+		[] (std::function<void(float)>) {}  // Explicitly does nothing
+	);
+	attach_Timeline_beatDuration = transportWrapper.tree.createGenericAttachment(
+		IDS::beat_duration,
+		transportTimeline,
+		[&] (int beatDuration) { transportTimeline.setBeatDuration(beatDuration); },
+		[] (std::function<void(float)>) {}  // Explicitly does nothing
+	);
+    addAndMakeVisible(transportTimeline);
 
 	// setup handlers, after all parameters have been attached
 	
@@ -64,7 +89,6 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	btnRewind.onClick = [this]
 		{
 			this->transportWrapper.rewind_flag = true;
-			getPosition();
 		};
 
 	// connect the play button to the "playing" audio parameter
@@ -85,34 +109,6 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 }
 
 UI_Transport::~UI_Transport() {}
-
-void UI_Transport::getPosition()
-{
-	//ppq = transportWrapper.getPpq();
-	//
-	//// Calculate the number of subdivisions per beat based on beat_duration
-	//int subDivisionsPerBeat = 16 / transportWrapper.beat_duration;  // This adjusts based on beat duration
-
-	//// Calculate the scaler for converting PPQ to beats based on beat duration
-	//float quarterNotesPerBeat = 4.0f / transportWrapper.beat_duration; // Adjust beat rate based on beat duration
-
-	//spinBeats.safeSetRange (1, transportWrapper.bar_length, 1);
-	//spinBeatDivisions.safeSetRange (1, (int) subDivisionsPerBeat, 1); // recalculate range
-
-	//// convert ppq to number of total beats, based on the beat duration
-	//float beatPosition = ppq / quarterNotesPerBeat;
-	//int bars = 1 + ((int)beatPosition / transportWrapper.bar_length);
-	//int beats = 1 + ((int) ppq % transportWrapper.bar_length);
-	//int divisions = 1 + ((int) (ppq * subDivisionsPerBeat) % subDivisionsPerBeat);
-	//
-	//spinBars.setValue(bars);
-	//spinBeats.setValue(beats);
-	//spinBeatDivisions.setValue(divisions);
-
-	//spinBars.timerCallback();
-	//spinBeats.timerCallback();
-	//spinBeatDivisions.timerCallback();
-}
 
 void UI_Transport::layout() {
 	// get the screen bounds
@@ -150,6 +146,8 @@ void UI_Transport::layout() {
 	spinBars.setBounds(posArea.removeFromLeft(50));
 	spinBeats.setBounds(posArea.removeFromLeft(30));
 	spinBeatDivisions.setBounds(posArea.removeFromLeft(30));
+
+    transportTimeline.setBounds(body.removeFromTop(35).reduced(p));
 }
 
 void UI_Transport::paint(juce::Graphics& g)
@@ -262,25 +260,4 @@ void UI_Transport::setupTimeSignature(bool hostControls)
 		spinBarLength.setEnabled(true);
 		spinBeatLength.setEnabled(true);
 	}
-}
-
-void UI_Transport::timerCallback()
-{
-	//spinBarLength.timerCallback();
-	//spinBeatLength.timerCallback();
-	//spinTempo.timerCallback();
-	//
-	//spinBars.timerCallback();
-	//spinBeats.timerCallback();
-	//spinBeatDivisions.timerCallback();
-
-	getPosition();
-	// pick up changes from the host
-	//if (transportWrapper.host_controls_tempo) {
-	//	spinTempo.setValue(transportWrapper.tempo, juce::NotificationType::dontSendNotification); // don't send notification, we're updating in response to a value change - the slider attachment would trigger a second update
-	//}
-	//if (transportWrapper.host_controls_time_signature) {
-	//	spinBarLength.setValue(transportWrapper.bar_length, juce::NotificationType::dontSendNotification);
-	//	spinBeatLength.setValue(transportWrapper.beat_duration, juce::NotificationType::dontSendNotification);
-	//}
 }

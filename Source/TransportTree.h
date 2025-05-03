@@ -11,6 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "StringConstants.h"
+#include "GenericComponentAttachment.h"
 
 /// <summary>
 /// Contains and initializes an AudioProcessorValueTreeState for the transport 
@@ -25,6 +26,7 @@ struct TransportTree
 	~TransportTree();
 
 	std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> createButtonAttachment(const juce::String& parameterID, juce::Button& button);
+	std::unique_ptr<GenericComponentAttachment> createGenericAttachment(const juce::String& parameterID, juce::Component& component, std::function<void(float)> paramToUi, std::function<void(std::function<void(float)>)> uiToParam);
 	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> createSliderAttachment(const juce::String& parameterID, juce::Slider& slider);
 private:
 	juce::AudioProcessorValueTreeState::ParameterLayout createParameters();

@@ -66,6 +66,11 @@ std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> TransportT
 	return std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(apvts, parameterID, button);
 }
 
+std::unique_ptr<GenericComponentAttachment> TransportTree::createGenericAttachment(const juce::String& parameterID, juce::Component& component, std::function<void(float)> paramToUi, std::function<void(std::function<void(float)>)> uiToParam)
+{
+	return std::make_unique<GenericComponentAttachment>(apvts, parameterID, component, paramToUi, uiToParam);
+}
+
 std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> TransportTree::createSliderAttachment(const juce::String& parameterID, juce::Slider& slider)
 {
 	return std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, parameterID, slider);

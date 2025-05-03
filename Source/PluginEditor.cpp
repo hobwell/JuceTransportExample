@@ -20,8 +20,6 @@ TransportExampleAudioProcessorEditor::TransportExampleAudioProcessorEditor(Trans
 	setSize(width, height);
 
 	addAndMakeVisible(transportInterface.get());
-
-	startTimer(33); // 33ms ~= 30fps
 }
 
 TransportExampleAudioProcessorEditor::~TransportExampleAudioProcessorEditor() {}
@@ -33,10 +31,4 @@ void TransportExampleAudioProcessorEditor::resized()
 {
 	// update subcomponents
 	transportInterface->setBounds(getLocalBounds());
-}
-
-void TransportExampleAudioProcessorEditor::timerCallback()
-{
-	// update subcomponents
-	transportInterface->timerCallback();
 }

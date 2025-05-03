@@ -35,12 +35,20 @@
         <FILE id="tWZn2W" name="TransportTree.h" compile="0" resource="0" file="Source/TransportTree.h"/>
       </GROUP>
       <GROUP id="{77CE7882-BC54-2B4A-4FF4-3E4B5791F4C4}" name="Components">
+        <FILE id="L1cHfb" name="GenericComponentAttachment.cpp" compile="1"
+              resource="0" file="Source/GenericComponentAttachment.cpp"/>
+        <FILE id="XNhuIi" name="GenericComponentAttachment.h" compile="0" resource="0"
+              file="Source/GenericComponentAttachment.h"/>
         <FILE id="UKfnqW" name="UI_ChoiceSpinner.cpp" compile="1" resource="0"
               file="Source/UI_ChoiceSpinner.cpp"/>
         <FILE id="jERT3O" name="UI_ChoiceSpinner.h" compile="0" resource="0"
               file="Source/UI_ChoiceSpinner.h"/>
         <FILE id="K6u8pP" name="UI_Spinner.cpp" compile="1" resource="0" file="Source/UI_Spinner.cpp"/>
         <FILE id="ptqSsl" name="UI_Spinner.h" compile="0" resource="0" file="Source/UI_Spinner.h"/>
+        <FILE id="YQYKJY" name="UI_TransportTimeline.cpp" compile="1" resource="0"
+              file="Source/UI_TransportTimeline.cpp"/>
+        <FILE id="ah8vHQ" name="UI_TransportTimeline.h" compile="0" resource="0"
+              file="Source/UI_TransportTimeline.h"/>
         <FILE id="xraZKV" name="UI_Transport.cpp" compile="1" resource="0"
               file="Source/UI_Transport.cpp"/>
         <FILE id="CDiVx5" name="UI_Transport.h" compile="0" resource="0" file="Source/UI_Transport.h"/>

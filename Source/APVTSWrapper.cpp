@@ -59,6 +59,7 @@ void ApvtsWrapper::setPos(float ppq)
     // convert ppq to number of total beats, based on the beat duration
     float beatPosition = ppq / quarterNotesPerBeat;
 
+    updateParameter(IDS::ppq, ppq);
     updateParameter(IDS::pos_bar, 1 + ((int) beatPosition / bar_length));
     updateParameter(IDS::pos_beat, 1 + ((int) beatPosition % bar_length));
     updateParameter(IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat));
