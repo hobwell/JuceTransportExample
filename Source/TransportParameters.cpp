@@ -37,7 +37,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransportParameters::createP
 	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_tempo, 1}, LABELS::host_controls_tempo_state, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_tempo_speed, 1}, LABELS::host_controls_tempo_speed, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_time_sig, 1}, LABELS::host_controls_time_signature_state, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::rewind_flag, 1}, LABELS::rewind_flag, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::reposition_flag, 1}, LABELS::reposition_flag, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::playing, 1}, LABELS::playing, false));
 	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::time_sig_controls_tempo_speed, 1}, LABELS::time_sig_controls_tempo_speed, false));
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {IDS::pos_bar, 1}, LABELS::pos_bar, 1.f, 99999.f, 1.f));
@@ -107,7 +107,7 @@ void TransportParameters::setPpq(float ppq)
 	apvts.getRawParameterValue(IDS::ppq)->store(ppq);
 }
 
-void TransportParameters::setPos(float ppq)
+void TransportParameters::setPos(float ppq, bool forceUpdate)
 {
 	// Calculate the number of subdivisions per beat based on beat_duration
 	int subDivisionsPerBeat = 16 / beat_duration;  // This adjusts based on beat duration
@@ -119,9 +119,9 @@ void TransportParameters::setPos(float ppq)
 	float beatPosition = ppq / quarterNotesPerBeat;
 
 	updateParameter(IDS::ppq, ppq);
-	updateParameter(IDS::pos_bar, 1 + ((int) beatPosition / bar_length));
-	updateParameter(IDS::pos_beat, 1 + ((int) beatPosition % bar_length));
-	updateParameter(IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat));
+	updateParameter(IDS::pos_bar, 1 + ((int) beatPosition / bar_length), forceUpdate);
+	updateParameter(IDS::pos_beat, 1 + ((int) beatPosition % bar_length), forceUpdate);
+	updateParameter(IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat), forceUpdate);
 }
 
 void TransportParameters::timerCallback()

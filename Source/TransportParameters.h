@@ -27,22 +27,26 @@ struct TransportParameters :
     juce::AudioProcessorValueTreeState::ParameterLayout parameters;
     juce::UndoManager* undoManager;
 
-    juce::CachedValue<int> bar_length {apvts.state, IDS::bar_length, undoManager, 4};
-    juce::CachedValue<int> beat_duration {apvts.state, IDS::beat_duration, undoManager, 4};
     juce::CachedValue<bool> host_controls_playing {apvts.state, IDS::host_controls_play, undoManager, false};
     juce::CachedValue<bool> host_controls_position {apvts.state, IDS::host_controls_position, undoManager, false};
     juce::CachedValue<bool> host_controls_tempo {apvts.state, IDS::host_controls_tempo, undoManager, false};
     juce::CachedValue<bool> host_controls_tempo_speed {apvts.state, IDS::host_controls_tempo_speed, undoManager, false};
     juce::CachedValue<bool> host_controls_time_signature {apvts.state, IDS::host_controls_time_sig, undoManager, false};
-    juce::CachedValue<bool> playing {apvts.state, IDS::playing, undoManager, false};
-    juce::CachedValue<bool> rewind_flag {apvts.state, IDS::rewind_flag, undoManager, false};
     juce::CachedValue<bool> time_sig_controls_tempo_speed {apvts.state, IDS::time_sig_controls_tempo_speed, undoManager, false};
+    
+    juce::CachedValue<int> bar_length {apvts.state, IDS::bar_length, undoManager, 4};
+    juce::CachedValue<int> beat_duration {apvts.state, IDS::beat_duration, undoManager, 4};
+    juce::CachedValue<bool> playing {apvts.state, IDS::playing, undoManager, false};
+    juce::CachedValue<bool> reposition_flag {apvts.state, IDS::reposition_flag, undoManager, false};
+
     // ppq is not a good candidate for a cached value, as it is frequently updated
     // juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
+
     // pos_* are not good candidates for cached values, as they are frequently updated
-    // juce::CachedValue<float> pos_bar{ apvts.state, IDS::pos_bar, undoManager, 0.f };
-    // juce::CachedValue<float> pos_beat{ apvts.state, IDS::pos_beat, undoManager, 0.f };
-    // juce::CachedValue<float> pos_div{ apvts.state, IDS::pos_div, undoManager, 0.f };
+    juce::CachedValue<float> pos_bar{ apvts.state, IDS::pos_bar, undoManager, 0.f };
+    juce::CachedValue<float> pos_beat{ apvts.state, IDS::pos_beat, undoManager, 0.f };
+    juce::CachedValue<float> pos_div{ apvts.state, IDS::pos_div, undoManager, 0.f };
+
     juce::CachedValue<float> sample_rate {apvts.state, IDS::sample_rate, undoManager, 384000.f};
     juce::CachedValue<float> tempo {apvts.state, IDS::tempo, undoManager, 120.f};
     juce::CachedValue<float> tempo_speed {apvts.state, IDS::tempo_speed, undoManager, 0.25f};
@@ -57,12 +61,12 @@ struct TransportParameters :
     void flushPendingUpdates();
     float getPpq();
     void setPpq(float ppq);
-    void setPos(float ppq);
+    void setPos(float ppq, bool forceUpdate = false);
     void timerCallback() override;
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
     template <typename TypeName>
-    void updateParameter(const juce::String& paramId, TypeName value) const
+    void updateParameter(const juce::String& paramId, TypeName value, bool forceUpdate = false) const
     {
         if (auto* param = apvts.getParameter(paramId))
         {
@@ -78,7 +82,7 @@ struct TransportParameters :
                 auto range = floatParam->getNormalisableRange();
                 auto normalized = range.convertTo0to1(static_cast<float>(value));
 
-                if (*floatParam == static_cast<float>(value))
+                if (*floatParam == static_cast<float>(value) && ! forceUpdate)
                     return; // Already the correct value, no need to push update!
 
                 const auto valueCopy = normalized;

@@ -31,6 +31,7 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
     void valueChanged() override;
+    std::function<void()> onUserEditComplete; // fired when the user has finished editing the value via the text box or spinner drag
     std::function<void(int)> onValueChanged;
 
     void safeSetRange(double newMin, double newMax, double newInterval);

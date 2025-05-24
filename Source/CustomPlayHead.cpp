@@ -24,9 +24,8 @@ CustomPlayHead::CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, 
     transportParams.host_controls_tempo = false;
     transportParams.host_controls_tempo_speed = false;
     transportParams.host_controls_time_signature = false;
-    transportParams.rewind_flag = false;
     transportParams.playing = false;
-    transportParams.rewind_flag = false;
+    transportParams.reposition_flag = false;
     transportParams.sample_rate = sampleRate;
     transportParams.tempo = 120.f;
     transportParams.tempo_speed = 0.25f; // 1/4 note duration
@@ -39,6 +38,25 @@ CustomPlayHead::CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, 
 }
 
 CustomPlayHead::~CustomPlayHead() {}
+
+/*
+* change position based on incoming ppq
+*/
+void CustomPlayHead::changePosition() const
+{
+    // clear buffer position? - not sure if we should do this...
+    bufferEnd = 0;
+    bufferStart = 0;
+    // get the current ppq position according to the transport
+    ppq = transportParams.getPpq();
+
+    // calculate the current time position
+    timeNs = ppq * samplesPerBeat * beatsPerQuarterNote * 1e9 / sampleRate;
+    
+    // clear the reposition flag
+    transportParams.reposition_flag = false;
+    updatePosition();
+}
 
 /*
 *  Calculate the current position of the playhead based on the buffer size and the host transport information
@@ -121,14 +139,9 @@ void CustomPlayHead::recalculate() const
 */
 void CustomPlayHead::synchronizeState()
 {
-    if (transportParams.rewind_flag)
+    if (transportParams.reposition_flag)
     {
-        bufferEnd = 0;
-        bufferStart = 0;
-        timeNs = 0;
-        ppq = 0;
-        transportParams.rewind_flag = false;
-        updatePosition();
+        changePosition();
     }
 
     hostInfo = *processor.getPlayHead()->getPosition();

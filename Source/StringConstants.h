@@ -29,7 +29,7 @@ namespace IDS
 	const juce::String pos_beat ("pos_beat");
 	const juce::String pos_div ("pos_div");
 	const juce::String ppq ("ppq");
-	const juce::String rewind_flag ("rewind_flag");
+	const juce::String reposition_flag ("reposition_flag");
 	const juce::String sample_rate ("sample_rate");
 	const juce::String tempo ("tempo");
 	const juce::String tempo_speed ("tempo_speed"); // tempo speed refers to the relative note duration (e.g. tempo speed = q to indicate time relative to quarter notes)
@@ -55,7 +55,7 @@ namespace LABELS
 	const juce::String pos_beat ("POS Beat");
 	const juce::String pos_div ("POS Div");
 	const juce::String ppq ("PPQ");
-	const juce::String rewind_flag ("Rewind Flag");
+	const juce::String reposition_flag ("Reposition Flag");
 	const juce::String sample_rate ("Sample Rate");
 	const juce::String tempo ("Tempo");
 	const juce::String tempo_speed ("Tempo Duration");

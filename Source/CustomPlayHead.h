@@ -70,6 +70,7 @@ private:
 
     juce::Optional<PositionInfo> getPosition() const override;
 
+    void changePosition() const;
     void updatePosition() const;
 
     void recalculate() const;

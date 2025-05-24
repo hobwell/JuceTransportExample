@@ -28,6 +28,7 @@ UI_Spinner::UI_Spinner(int numDecimalsToDisplay, juce::Justification align = juc
                 setValue(newValue, juce::sendNotification);
             }
             label.setText(getDisplayString(), juce::NotificationType::dontSendNotification);
+            juce::NullCheckedInvocation::invoke(onUserEditComplete);
         };
     label.onEditorHide = [this] ()
         {
@@ -106,7 +107,7 @@ void UI_Spinner::mouseDown(const juce::MouseEvent& e)
         // If decimal found, compare click position to it
         if (decimalX >= 0.0f)
         {
-            isAdjustingDecimal = (e.x > decimalX);
+            isAdjustingDecimal = (e.x > decimalX) && displayPrecision > 0;
         }
         else
         {
@@ -128,7 +129,7 @@ void UI_Spinner::mouseDrag(const juce::MouseEvent& e)
         // Pixel movement since last drag
         int pixelDelta = std::abs(currentY - lastDragY);
 
-        wasDragging = pixelDelta >= 2;
+        wasDragging = dragStartY >= 2;
 
         // Time since last drag in milliseconds
         int timeDeltaMs = (int) (currentTime.toMilliseconds() - lastDragTime.toMilliseconds());
@@ -188,7 +189,11 @@ void UI_Spinner::mouseUp(const juce::MouseEvent& e)
 
     if (isEnabled())
     {
-        if (!wasDragging)
+        if (wasDragging)
+        {
+            juce::NullCheckedInvocation::invoke(onUserEditComplete);
+        }
+        else
         {
             label.showEditor();
             if (auto* editor = label.getCurrentTextEditor())
@@ -221,6 +226,7 @@ void UI_Spinner::safeSetRange(double min, double max, double interval)
     {
         max = min + 1;
         setValue(min);
+        valueChanged();
         setLocked(true);
     }
     else

@@ -28,6 +28,8 @@ public:
     UI_Transport(TransportParameters& transportParams);
     ~UI_Transport() override;
 
+    void updatePpqFromUI(std::function<void(float)> f);
+
     void paint(juce::Graphics&) override;
     void resized() override;
 private:
@@ -74,6 +76,9 @@ private:
     std::unique_ptr<GenericComponentAttachment> attach_Timeline_ppq;
     std::unique_ptr<GenericComponentAttachment> attach_Timeline_barLength;
     std::unique_ptr<GenericComponentAttachment> attach_Timeline_beatDuration;
+    std::unique_ptr<GenericComponentAttachment> attach_Timeline_bar;
+    std::unique_ptr<GenericComponentAttachment> attach_Timeline_beat;
+    std::unique_ptr<GenericComponentAttachment> attach_Timeline_division;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UI_Transport)
 };
