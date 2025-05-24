@@ -11,8 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "TransportTree.h"
-#include "APVTSWrapper.h"
+#include "TransportParameters.h"
 
 /// <summary>
 /// A custom playhed that will sync changes to transport information into an 
@@ -27,7 +26,7 @@
 class CustomPlayHead : public juce::AudioPlayHead
 {
 public:
-    CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, ApvtsWrapper& wrapper);
+    CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, TransportParameters& wrapper);
 
     ~CustomPlayHead() override;
 
@@ -35,7 +34,7 @@ public:
 
     void synchronizeState();
 private:
-    ApvtsWrapper& transportWrapper;
+    TransportParameters& transportParams;
 
     juce::AudioProcessor& processor;
     juce::AudioPlayHead::PositionInfo& info = juce::AudioPlayHead::PositionInfo();

@@ -27,12 +27,10 @@
               file="Source/StringConstants.h"/>
       </GROUP>
       <GROUP id="{D020E1CD-FE85-0E00-D4B5-8501DBF540A3}" name="Parameters">
-        <FILE id="KIQE3d" name="ApvtsWrapper.cpp" compile="1" resource="0"
-              file="Source/ApvtsWrapper.cpp"/>
-        <FILE id="H68scF" name="ApvtsWrapper.h" compile="0" resource="0" file="Source/ApvtsWrapper.h"/>
-        <FILE id="LVjJ6c" name="TransportTree.cpp" compile="1" resource="0"
-              file="Source/TransportTree.cpp"/>
-        <FILE id="tWZn2W" name="TransportTree.h" compile="0" resource="0" file="Source/TransportTree.h"/>
+        <FILE id="LVjJ6c" name="TransportParameters.cpp" compile="1" resource="0"
+              file="Source/TransportParameters.cpp"/>
+        <FILE id="tWZn2W" name="TransportParameters.h" compile="0" resource="0"
+              file="Source/TransportParameters.h"/>
       </GROUP>
       <GROUP id="{77CE7882-BC54-2B4A-4FF4-3E4B5791F4C4}" name="Components">
         <FILE id="L1cHfb" name="GenericComponentAttachment.cpp" compile="1"

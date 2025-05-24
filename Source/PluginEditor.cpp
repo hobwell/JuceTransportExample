@@ -14,7 +14,7 @@ TransportExampleAudioProcessorEditor::TransportExampleAudioProcessorEditor(Trans
 	: AudioProcessorEditor(&p), audioProcessor(p)
 {
 	// create the transport interface
-	transportInterface = std::make_unique<UI_Transport>(*p.transportWrapper);
+	transportInterface = std::make_unique<UI_Transport>(*p.transportParams);
 	setResizable(true, true);
 
 	setSize(width, height);

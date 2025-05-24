@@ -1,8 +1,8 @@
 /*
   ==============================================================================
 
-    AVPTSWrapper.h
-    Created: 14 Oct 2024 2:52:50pm
+    TransportParameters.h
+    Created: 3 Oct 2024 11:37:13pm
     Author:  Nicholas
 
   ==============================================================================
@@ -10,31 +10,32 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "TransportTree.h"
+#include "StringConstants.h"
+#include "GenericComponentAttachment.h"
 
 /// <summary>
-/// A wapper class for the AudioProcessorValueTreeState that provides a more
-/// convenient way to access the parameters in the tree and a mechanism to 
-/// raise events in response to changes to those parameters.
+/// Contains and initializes an AudioProcessorValueTreeState for the transport 
+/// parameters of the plugin.
 /// </summary>
-/// <see href="https://www.classcentral.com/classroom/youtube-vars-values-and-valuetrees-state-management-in-juce-jelle-bakker-adc23-320032">ADC23 - Jelle Bakker: Vars, Values and ValueTrees: Managing State with JUCE</see>
-struct ApvtsWrapper : 
+struct TransportParameters :
     juce::ValueTree::Listener,
     juce::Timer
 {
+    juce::AudioProcessorValueTreeState _apvts;
     juce::AudioProcessorValueTreeState& apvts;
-    TransportTree& tree;
+
+    juce::AudioProcessorValueTreeState::ParameterLayout parameters;
     juce::UndoManager* undoManager;
 
-    juce::CachedValue<int> bar_length{ apvts.state, IDS::bar_length, undoManager, 4 };
-    juce::CachedValue<int> beat_duration{ apvts.state, IDS::beat_duration, undoManager, 4 };
-    juce::CachedValue<bool> host_controls_playing{ apvts.state, IDS::host_controls_play, undoManager, false };
-    juce::CachedValue<bool> host_controls_position{ apvts.state, IDS::host_controls_position, undoManager, false };
-    juce::CachedValue<bool> host_controls_tempo{ apvts.state, IDS::host_controls_tempo, undoManager, false };
+    juce::CachedValue<int> bar_length {apvts.state, IDS::bar_length, undoManager, 4};
+    juce::CachedValue<int> beat_duration {apvts.state, IDS::beat_duration, undoManager, 4};
+    juce::CachedValue<bool> host_controls_playing {apvts.state, IDS::host_controls_play, undoManager, false};
+    juce::CachedValue<bool> host_controls_position {apvts.state, IDS::host_controls_position, undoManager, false};
+    juce::CachedValue<bool> host_controls_tempo {apvts.state, IDS::host_controls_tempo, undoManager, false};
     juce::CachedValue<bool> host_controls_tempo_speed {apvts.state, IDS::host_controls_tempo_speed, undoManager, false};
-    juce::CachedValue<bool> host_controls_time_signature{ apvts.state, IDS::host_controls_time_sig, undoManager, false };
-    juce::CachedValue<bool> playing{ apvts.state, IDS::playing, undoManager, false };
-    juce::CachedValue<bool> rewind_flag{ apvts.state, IDS::rewind_flag, undoManager, false };
+    juce::CachedValue<bool> host_controls_time_signature {apvts.state, IDS::host_controls_time_sig, undoManager, false};
+    juce::CachedValue<bool> playing {apvts.state, IDS::playing, undoManager, false};
+    juce::CachedValue<bool> rewind_flag {apvts.state, IDS::rewind_flag, undoManager, false};
     juce::CachedValue<bool> time_sig_controls_tempo_speed {apvts.state, IDS::time_sig_controls_tempo_speed, undoManager, false};
     // ppq is not a good candidate for a cached value, as it is frequently updated
     // juce::CachedValue<float> ppq{ apvts.state, IDS::ppq, undoManager, 0.f };
@@ -42,21 +43,23 @@ struct ApvtsWrapper :
     // juce::CachedValue<float> pos_bar{ apvts.state, IDS::pos_bar, undoManager, 0.f };
     // juce::CachedValue<float> pos_beat{ apvts.state, IDS::pos_beat, undoManager, 0.f };
     // juce::CachedValue<float> pos_div{ apvts.state, IDS::pos_div, undoManager, 0.f };
-    juce::CachedValue<float> sample_rate{ apvts.state, IDS::sample_rate, undoManager, 384000.f };
-    juce::CachedValue<float> tempo{ apvts.state, IDS::tempo, undoManager, 120.f };
-    juce::CachedValue<float> tempo_speed{ apvts.state, IDS::tempo_speed, undoManager, 0.25f };
+    juce::CachedValue<float> sample_rate {apvts.state, IDS::sample_rate, undoManager, 384000.f};
+    juce::CachedValue<float> tempo {apvts.state, IDS::tempo, undoManager, 120.f};
+    juce::CachedValue<float> tempo_speed {apvts.state, IDS::tempo_speed, undoManager, 0.25f};
 
-    ApvtsWrapper(TransportTree* transport_tree, juce::UndoManager* undoManager);
-    ~ApvtsWrapper();
+    TransportParameters(juce::AudioProcessor& processor, juce::UndoManager* undoManager, const juce::Identifier& valueTreeType);
+    ~TransportParameters();
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> createButtonAttachment(const juce::String& parameterID, juce::Button& button);
+    std::unique_ptr<GenericComponentAttachment> createGenericAttachment(const juce::String& parameterID, juce::Component& component, std::function<void(float)> paramToUi, std::function<void(std::function<void(float)>)> uiToParam);
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> createSliderAttachment(const juce::String& parameterID, juce::Slider& slider);
 
     void flushPendingUpdates();
-
     float getPpq();
     void setPpq(float ppq);
-
     void setPos(float ppq);
-
     void timerCallback() override;
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
     template <typename TypeName>
     void updateParameter(const juce::String& paramId, TypeName value) const
@@ -139,14 +142,15 @@ struct ApvtsWrapper :
         }
     }
 
-    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
- 
 private:
+
     mutable juce::SpinLock pendingUpdatesLock;
     
     // When updateParameter() is called, it just overwrites the last update for that parameterId.
     // If multiple calls happen, only the last value stays in the queue.
     mutable std::unordered_map<juce::String, std::function<void()>> pendingUpdates;
+    
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ApvtsWrapper)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TransportParameters)
 };

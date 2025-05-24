@@ -12,58 +12,58 @@
 #include "UI_Transport.h"
 
 //==============================================================================
-UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
-	transportWrapper(transportWrapper),
+UI_Transport::UI_Transport(TransportParameters& transportParams) :
+	transportParams(transportParams),
     spinTempoDuration(TEMPO::duration_options)
 {
 	// connect sliders to audio parameters
 	// this will adjust the slider's range to match the parameter's range
-	attach_Tempo = transportWrapper.tree.createSliderAttachment(IDS::tempo, spinTempo);
+	attach_Tempo = transportParams.createSliderAttachment(IDS::tempo, spinTempo);
     // let the slider know that it is attached to a parameter
-    spinTempo.setAttachedParameter(transportWrapper.apvts.getParameter(IDS::tempo));
+    spinTempo.setAttachedParameter(transportParams.apvts.getParameter(IDS::tempo));
 	// make control visible
 	addAndMakeVisible(spinTempo);
 
-	attach_TempoOptions = transportWrapper.tree.createSliderAttachment(IDS::tempo_speed, spinTempoDuration);
+	attach_TempoOptions = transportParams.createSliderAttachment(IDS::tempo_speed, spinTempoDuration);
 	addAndMakeVisible(spinTempoDuration);
 
-	attach_BarLength = transportWrapper.tree.createSliderAttachment(IDS::bar_length, spinBarLength);
+	attach_BarLength = transportParams.createSliderAttachment(IDS::bar_length, spinBarLength);
 	addAndMakeVisible(spinBarLength);
 
 	lblTimeSigSep.setText("/", juce::dontSendNotification);
 	addAndMakeVisible(lblTimeSigSep);
 
-	attach_BeatLength = transportWrapper.tree.createSliderAttachment(IDS::beat_duration, spinBeatLength);
+	attach_BeatLength = transportParams.createSliderAttachment(IDS::beat_duration, spinBeatLength);
 	addAndMakeVisible(spinBeatLength);
 
-	attach_Pos_Bar = transportWrapper.tree.createSliderAttachment(IDS::pos_bar, spinBars);
+	attach_Pos_Bar = transportParams.createSliderAttachment(IDS::pos_bar, spinBars);
 	addAndMakeVisible(spinBars);
 
-	attach_Pos_Beat = transportWrapper.tree.createSliderAttachment(IDS::pos_beat, spinBeats);
+	attach_Pos_Beat = transportParams.createSliderAttachment(IDS::pos_beat, spinBeats);
 	addAndMakeVisible(spinBeats);
 
-	attach_Pos_Div = transportWrapper.tree.createSliderAttachment(IDS::pos_div, spinBeatDivisions);
+	attach_Pos_Div = transportParams.createSliderAttachment(IDS::pos_div, spinBeatDivisions);
 	addAndMakeVisible(spinBeatDivisions);
 
-	attach_Timeline_ppq = transportWrapper.tree.createGenericAttachment(
+	attach_Timeline_ppq = transportParams.createGenericAttachment(
 		IDS::ppq,
 		transportTimeline,
 		[&] (float ppq) { transportTimeline.setTransportPosition(ppq); },
 		[&] (std::function<void(float)> f) { /* TODO: when the timeline is reposition, update ppq */ }
 	);
-	attach_Timeline_playing = transportWrapper.tree.createGenericAttachment(
+	attach_Timeline_playing = transportParams.createGenericAttachment(
 		IDS::playing,
 		transportTimeline,
 		[&] (bool playing) { transportTimeline.setPlaying(playing); },
 		[] (std::function<void(float)>) {}  // Explicitly does nothing
 	);
-	attach_Timeline_barLength = transportWrapper.tree.createGenericAttachment(
+	attach_Timeline_barLength = transportParams.createGenericAttachment(
 		IDS::bar_length,
 		transportTimeline,
 		[&] (int barLength) { transportTimeline.setBarLength(barLength); },
 		[] (std::function<void(float)>) {}  // Explicitly does nothing
 	);
-	attach_Timeline_beatDuration = transportWrapper.tree.createGenericAttachment(
+	attach_Timeline_beatDuration = transportParams.createGenericAttachment(
 		IDS::beat_duration,
 		transportTimeline,
 		[&] (int beatDuration) { transportTimeline.setBeatDuration(beatDuration); },
@@ -74,10 +74,10 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	// setup handlers, after all parameters have been attached
 	
 	// if the arbiter of the tempo changes, re-initialize the tempo setup
-	setupTempo(transportWrapper.host_controls_tempo);
-	setupTempoRelativeNoteDuration(transportWrapper.host_controls_tempo_speed);
-	setupTimeSignature(transportWrapper.host_controls_time_signature);
-	setupPosition(transportWrapper.host_controls_position);
+	setupTempo(transportParams.host_controls_tempo);
+	setupTempoRelativeNoteDuration(transportParams.host_controls_tempo_speed);
+	setupTimeSignature(transportParams.host_controls_time_signature);
+	setupPosition(transportParams.host_controls_position);
 
 	btnRewind.setLookAndFeel(&fontAwesome);
 	btnRewind.setButtonText(fontAwesome.icon_backward);
@@ -88,11 +88,11 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	addAndMakeVisible(btnRewind);
 	btnRewind.onClick = [this]
 		{
-			this->transportWrapper.rewind_flag = true;
+			this->transportParams.rewind_flag = true;
 		};
 
 	// connect the play button to the "playing" audio parameter
-	attach_Play = transportWrapper.tree.createButtonAttachment(IDS::playing, btnPlay);
+	attach_Play = transportParams.createButtonAttachment(IDS::playing, btnPlay);
 
 	btnPlay.setLookAndFeel(&fontAwesome);
 	btnPlay.setButtonText(fontAwesome.icon_play);
@@ -104,7 +104,7 @@ UI_Transport::UI_Transport(ApvtsWrapper& transportWrapper) :
 	addAndMakeVisible(btnPlay);
 
 	// initialize the playing setup
-	setupPlayControl(transportWrapper.host_controls_playing);
+	setupPlayControl(transportParams.host_controls_playing);
 
 }
 
@@ -180,9 +180,9 @@ void UI_Transport::setupPlayControl(bool hostControls)
 			else {
 				btnPlay.setButtonText(fontAwesome.icon_play);
 			}
-			if (!this->transportWrapper.host_controls_playing) {
+			if (!this->transportParams.host_controls_playing) {
 				// also set the transport playing state
-				this->transportWrapper.playing = btnPlay.getToggleState();
+				this->transportParams.playing = btnPlay.getToggleState();
 			}
 		};
 }
@@ -215,7 +215,7 @@ void UI_Transport::setupTempo(bool hostControls)
 		//	{
 		//		// when the spinner value changes, update the tree
 		//		// this is causing access violation errors
-		//		transportWrapper.tempo = (int)round(spinTempo.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
+		//		transportParams.tempo = (int)round(spinTempo.getValue()); // BUG: this assignment is causing the listener to trigger, which is sometimes causing an error
 		//	};
 	}
 }
@@ -238,7 +238,7 @@ void UI_Transport::setupTempoRelativeNoteDuration(bool hostControls)
 		//spinTempoDuration.onValueChange = [&]
 		//	{
 		//		// when the spinner value changes, update the tree
-		//		transportWrapper.tempo_speed = spinTempoDuration.getValue();
+		//		transportParams.tempo_speed = spinTempoDuration.getValue();
 		//	};
 	}
 }

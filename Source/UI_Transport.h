@@ -13,8 +13,7 @@
 #include <JuceHeader.h>
 #include "UI_Spinner.h"
 #include "UI_ChoiceSpinner.h"
-#include "TransportTree.h"
-#include "APVTSWrapper.h"
+#include "TransportParameters.h"
 #include "FontAwesome_LookAndFeel.h"
 #include "UI_TransportTimeline.h"
 
@@ -26,7 +25,7 @@ class UI_Transport : public juce::Component, public juce::ChangeBroadcaster
 public:
     bool playing = false;
 
-    UI_Transport(ApvtsWrapper& transportWrapper);
+    UI_Transport(TransportParameters& transportParams);
     ~UI_Transport() override;
 
     void paint(juce::Graphics&) override;
@@ -47,7 +46,7 @@ private:
     UI_Spinner spinTempo{ 2, juce::Justification::centred, true };
     UI_TransportTimeline transportTimeline;
 
-    ApvtsWrapper& transportWrapper;
+    TransportParameters& transportParams;
 
     juce::Desktop& desktop{ juce::Desktop::getInstance() };
 

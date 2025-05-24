@@ -22,8 +22,7 @@ TransportExampleAudioProcessor::TransportExampleAudioProcessor()
                        )
 #endif
 {
-    transport_tree = std::make_shared<TransportTree>(*this, nullptr, IDS::transport_tree);
-    transportWrapper = std::make_shared<ApvtsWrapper>(transport_tree.get(), nullptr);
+    transportParams = std::make_shared<TransportParameters>(*this, nullptr, IDS::transport_tree);
 }
 
 TransportExampleAudioProcessor::~TransportExampleAudioProcessor()
@@ -100,7 +99,7 @@ void TransportExampleAudioProcessor::prepareToPlay (double sampleRate, int sampl
     // initialisation that you need...
     // only initialize once
     if (customPlayHead == nullptr) {
-        customPlayHead = new CustomPlayHead(*this, sampleRate, *transportWrapper);
+        customPlayHead = new CustomPlayHead(*this, sampleRate, *transportParams);
     }
 }
 
