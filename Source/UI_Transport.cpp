@@ -66,7 +66,11 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
     attach_Timeline_playing = transportParams.createGenericAttachment(
         IDS::playing,
         transportTimeline,
-        [&] (bool playing) { transportTimeline.setPlaying(playing); },
+        [&] (bool playing) 
+        { 
+            transportTimeline.setPlaying(playing);
+            setupPosition(transportParams.host_controls_playing || playing);
+        },
         [] (std::function<void(float)>) {}  // Explicitly does nothing
     );
     attach_Timeline_barLength = transportParams.createGenericAttachment(
