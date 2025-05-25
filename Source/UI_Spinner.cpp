@@ -239,7 +239,7 @@ void UI_Spinner::safeSetRange(double min, double max, double interval)
 
 void UI_Spinner::setAttachedParameter(juce::RangedAudioParameter* param)
 {
-    attachedParameter = dynamic_cast<juce::AudioParameterFloat*>(param);
+    attachedParameter = param;
 }
 
 void UI_Spinner::setLocked(bool lock)
@@ -263,6 +263,6 @@ void UI_Spinner::valueChanged()
 
 bool UI_Spinner::valueIsInRange(float value)
 {
-    auto range = attachedParameter->range;
+    auto range = attachedParameter->getNormalisableRange();
     return (value >= range.start && value <= range.end);
 }

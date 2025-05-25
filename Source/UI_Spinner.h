@@ -37,7 +37,7 @@ public:
     void safeSetRange(double newMin, double newMax, double newInterval);
     void setAttachedParameter(juce::RangedAudioParameter*);
 private:
-    juce::AudioParameterFloat* attachedParameter = nullptr;
+    juce::RangedAudioParameter* attachedParameter = nullptr;
     int displayPrecision = 0; // number of decimal places to display
     bool wasDragging = false;
     int dragStartY = 0;

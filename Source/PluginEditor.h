@@ -22,9 +22,6 @@ public:
 	~TransportExampleAudioProcessorEditor() override;
 
 	//==============================================================================
-	int height = 75;
-	int width = 660;
-
 	void paint(juce::Graphics&) override;
 	void resized() override;
 private:

@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "TransportLayoutConstants.h"
 
 //==============================================================================
 TransportExampleAudioProcessorEditor::TransportExampleAudioProcessorEditor(TransportExampleAudioProcessor& p)
@@ -17,7 +18,7 @@ TransportExampleAudioProcessorEditor::TransportExampleAudioProcessorEditor(Trans
 	transportInterface = std::make_unique<UI_Transport>(*p.transportParams);
 	setResizable(true, true);
 
-	setSize(width, height);
+	setSize(LAYOUT::TRANSPORT::WINDOW::WIDTH, LAYOUT::TRANSPORT::WINDOW::HEIGHT);
 
 	addAndMakeVisible(transportInterface.get());
 }

@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "UI_Transport.h"
+#include "TransportLayoutConstants.h"
 
 //==============================================================================
 UI_Transport::UI_Transport(TransportParameters& transportParams) :
@@ -182,11 +183,11 @@ void UI_Transport::layout()
     auto desktopArea = desktop.getDisplays().getMainDisplay().totalArea; // TODO: use this information to scale the transport view (e.g. for 4k displays)
 
     auto body = getLocalBounds();
-    int p = 5; // padding
+    int p = LAYOUT::TRANSPORT::PADDING; // padding
     int pp = p * 2; // double padding - added to width and height to account for padding on all sides
-    int h = 25; // height of the transport bar
-    int w = 450; // width of the transport bar
-    int bw = 35; // button width
+    int h = LAYOUT::TRANSPORT::HEIGHT;
+    int w = body.getWidth();
+    int bw = LAYOUT::TRANSPORT::BUTTON::WIDTH;
 
     // define the inner area of the component
     auto area = body.removeFromTop(h + pp).removeFromLeft(getWidth()); // transport should take the full width
@@ -214,7 +215,7 @@ void UI_Transport::layout()
     spinBeats.setBounds(posArea.removeFromLeft(30));
     spinBeatDivisions.setBounds(posArea.removeFromLeft(30));
 
-    transportTimeline.setBounds(body.removeFromTop(35).reduced(p));
+    transportTimeline.setBounds(body.removeFromTop(LAYOUT::TRANSPORT::TIMELINE::HEIGHT).reduced(p));
 }
 
 void UI_Transport::paint(juce::Graphics& g)
