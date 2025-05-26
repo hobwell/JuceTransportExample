@@ -30,27 +30,27 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransportParameters::createP
 {
 	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-	params.push_back (std::make_unique<juce::AudioParameterInt> (juce::ParameterID {IDS::beat_duration, 1}, LABELS::beat_duration, 1, 16, 4));
-	params.push_back (std::make_unique<juce::AudioParameterInt> (juce::ParameterID {IDS::bar_length, 1}, LABELS::bar_length, 1, 99, 4));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_play, 1}, LABELS::host_controls_play_state, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_position, 1}, LABELS::host_controls_position_state, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_tempo, 1}, LABELS::host_controls_tempo_state, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_tempo_speed, 1}, LABELS::host_controls_tempo_speed, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::host_controls_time_sig, 1}, LABELS::host_controls_time_signature_state, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::reposition_flag, 1}, LABELS::reposition_flag, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::playing, 1}, LABELS::playing, false));
-	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {IDS::time_sig_controls_tempo_speed, 1}, LABELS::time_sig_controls_tempo_speed, false));
-	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {IDS::pos_bar, 1}, LABELS::pos_bar, 1.f, 99999.f, 1.f));
-	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {IDS::pos_beat, 1}, LABELS::pos_beat, 1.f, 99.f, 1.f));
-	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {IDS::pos_div, 1}, LABELS::pos_div, 1.f, 256.f, 1.f));
-	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {IDS::ppq, 1}, LABELS::ppq, -99999.f, 99999.f, 0)); // 27+hrs at 60bpm, 13+hrs @ 120bpm etc.
-	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {IDS::sample_rate, 1}, LABELS::sample_rate, 0.f, 384000.f, 48000.f));
+	params.push_back (std::make_unique<juce::AudioParameterInt> (juce::ParameterID {TRANSPORT::IDS::beat_duration, 1}, TRANSPORT::LABELS::beat_duration, 1, 16, 4));
+	params.push_back (std::make_unique<juce::AudioParameterInt> (juce::ParameterID {TRANSPORT::IDS::bar_length, 1}, TRANSPORT::LABELS::bar_length, 1, 99, 4));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::host_controls_play, 1}, TRANSPORT::LABELS::host_controls_play_state, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::host_controls_position, 1}, TRANSPORT::LABELS::host_controls_position_state, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::host_controls_tempo, 1}, TRANSPORT::LABELS::host_controls_tempo_state, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::host_controls_tempo_speed, 1}, TRANSPORT::LABELS::host_controls_tempo_speed, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::host_controls_time_sig, 1}, TRANSPORT::LABELS::host_controls_time_signature_state, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::reposition_flag, 1}, TRANSPORT::LABELS::reposition_flag, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::playing, 1}, TRANSPORT::LABELS::playing, false));
+	params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID {TRANSPORT::IDS::time_sig_controls_tempo_speed, 1}, TRANSPORT::LABELS::time_sig_controls_tempo_speed, false));
+	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::pos_bar, 1}, TRANSPORT::LABELS::pos_bar, 1.f, 99999.f, 1.f));
+	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::pos_beat, 1}, TRANSPORT::LABELS::pos_beat, 1.f, 99.f, 1.f));
+	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::pos_div, 1}, TRANSPORT::LABELS::pos_div, 1.f, 256.f, 1.f));
+	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::ppq, 1}, TRANSPORT::LABELS::ppq, -99999.f, 99999.f, 0)); // 27+hrs at 60bpm, 13+hrs @ 120bpm etc.
+	params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::sample_rate, 1}, TRANSPORT::LABELS::sample_rate, 0.f, 384000.f, 48000.f));
 	
 	// need to specify the step size for the tempo so that it can be exact
 	juce::NormalisableRange<float> tempoSteppedRange(1.00, 999.0f, 0.01f);
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (
-		juce::ParameterID {IDS::tempo, 1}, 
-		LABELS::tempo, 
+		juce::ParameterID {TRANSPORT::IDS::tempo, 1}, 
+		TRANSPORT::LABELS::tempo, 
 		tempoSteppedRange, 
 		120.f
 	));
@@ -58,12 +58,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransportParameters::createP
     // need to specify the step size for the tempo duration so that it can be exact
     juce::NormalisableRange<float> tempoDurationSteppedRange(0.0078125f, 1.0f, 0.00390625f); // step size is 1/256
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		juce::ParameterID {IDS::tempo_speed, 1}, 
-		LABELS::tempo_speed, 
+		juce::ParameterID {TRANSPORT::IDS::tempo_speed, 1}, 
+		TRANSPORT::LABELS::tempo_speed, 
 		tempoDurationSteppedRange, 
 		0.25f
 	));
-	//params.push_back(std::make_unique<SyncedAudioParameterFloat>(IDS::tempo_speed, LABELS::tempo_speed, tempoSteppedRange, 0.25f, apvts.state));
+	//params.push_back(std::make_unique<SyncedAudioParameterFloat>(TRANSPORT::IDS::tempo_speed, TRANSPORT::LABELS::tempo_speed, tempoSteppedRange, 0.25f, apvts.state));
 
 	return { params.begin(), params.end() };
 }
@@ -99,12 +99,12 @@ void TransportParameters::flushPendingUpdates()
 
 float TransportParameters::getPpq()
 {
-	return *apvts.getRawParameterValue(IDS::ppq);
+	return *apvts.getRawParameterValue(TRANSPORT::IDS::ppq);
 }
 
 void TransportParameters::setPpq(float ppq)
 {
-	apvts.getRawParameterValue(IDS::ppq)->store(ppq);
+	apvts.getRawParameterValue(TRANSPORT::IDS::ppq)->store(ppq);
 }
 
 void TransportParameters::setPos(float ppq, bool forceUpdate)
@@ -118,10 +118,10 @@ void TransportParameters::setPos(float ppq, bool forceUpdate)
 	// convert ppq to number of total beats, based on the beat duration
 	float beatPosition = ppq / quarterNotesPerBeat;
 
-	updateParameter(IDS::ppq, ppq);
-	updateParameter(IDS::pos_bar, 1 + ((int) beatPosition / bar_length), forceUpdate);
-	updateParameter(IDS::pos_beat, 1 + ((int) beatPosition % bar_length), forceUpdate);
-	updateParameter(IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat), forceUpdate);
+	updateParameter(TRANSPORT::IDS::ppq, ppq);
+	updateParameter(TRANSPORT::IDS::pos_bar, 1 + ((int) beatPosition / bar_length), forceUpdate);
+	updateParameter(TRANSPORT::IDS::pos_beat, 1 + ((int) beatPosition % bar_length), forceUpdate);
+	updateParameter(TRANSPORT::IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat), forceUpdate);
 }
 
 void TransportParameters::timerCallback()

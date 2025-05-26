@@ -9,7 +9,6 @@
 */
 
 #include "UI_TransportTimeline.h"
-#include "TransportLayoutConstants.h"
 
 UI_TransportTimeline::UI_TransportTimeline()
 {

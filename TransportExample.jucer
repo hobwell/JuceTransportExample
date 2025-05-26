@@ -23,10 +23,8 @@
               file="Resources/FA6FreeSolid.otf"/>
       </GROUP>
       <GROUP id="{C08C3F86-D22A-BA2C-C3BD-9D425FB8C1BC}" name="Constants">
-        <FILE id="k2ZsFG" name="TransportLayoutConstants.h" compile="0" resource="0"
-              file="Source/TransportLayoutConstants.h"/>
-        <FILE id="Bdjvqq" name="StringConstants.h" compile="0" resource="0"
-              file="Source/StringConstants.h"/>
+        <FILE id="k2ZsFG" name="TransportConstants.h" compile="0" resource="0"
+              file="Source/TransportConstants.h"/>
       </GROUP>
       <GROUP id="{D020E1CD-FE85-0E00-D4B5-8501DBF540A3}" name="Parameters">
         <FILE id="LVjJ6c" name="TransportParameters.cpp" compile="1" resource="0"

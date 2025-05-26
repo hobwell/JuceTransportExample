@@ -165,7 +165,7 @@ void CustomPlayHead::synchronizeState()
         // set the playing state in the transport params
         //updateParameter(IDS::playing, isPlaying);
         transportParams.playing = isPlaying;
-        DBG("TParam: " << *transportParams.apvts.getRawParameterValue(IDS::playing));
+        DBG("TParam: " << *transportParams.apvts.getRawParameterValue(TRANSPORT::IDS::playing));
     }
 
     // if the host provides a tempo, use it
@@ -176,7 +176,7 @@ void CustomPlayHead::synchronizeState()
     }
     else
     {
-        nextTempo = transportParams.apvts.getRawParameterValue(IDS::tempo)->load();
+        nextTempo = transportParams.apvts.getRawParameterValue(TRANSPORT::IDS::tempo)->load();
         transportParams.host_controls_tempo = false;
     }
 
@@ -188,7 +188,7 @@ void CustomPlayHead::synchronizeState()
         if (transportParams.host_controls_tempo)
         {
             // set the tempo in the transport params
-            transportParams.updateParameter(IDS::tempo, nextTempo);
+            transportParams.updateParameter(TRANSPORT::IDS::tempo, nextTempo);
         }
     };
 
@@ -210,9 +210,9 @@ void CustomPlayHead::synchronizeState()
         nextTimeSig.denominator = transportParams.beat_duration;
         //updateParameter(IDS::host_controls_time_sig, false);
         transportParams.host_controls_time_signature = false;
-        transportParams.updateParameter(IDS::host_controls_tempo_speed, false);
+        transportParams.updateParameter(TRANSPORT::IDS::host_controls_tempo_speed, false);
         transportParams.host_controls_tempo_speed = false;
-        transportParams.updateParameter(IDS::time_sig_controls_tempo_speed, false);
+        transportParams.updateParameter(TRANSPORT::IDS::time_sig_controls_tempo_speed, false);
         transportParams.time_sig_controls_tempo_speed = false;
     }
 
@@ -224,8 +224,8 @@ void CustomPlayHead::synchronizeState()
         needsUpdate = true;
 
         // set the time signature in the transport params
-        transportParams.updateParameter(IDS::bar_length, nextTimeSig.numerator);
-        transportParams.updateParameter(IDS::beat_duration, nextTimeSig.denominator);
+        transportParams.updateParameter(TRANSPORT::IDS::bar_length, nextTimeSig.numerator);
+        transportParams.updateParameter(TRANSPORT::IDS::beat_duration, nextTimeSig.denominator);
         DBG("Time Signature: " << timeSig.numerator << "/" << timeSig.denominator);
     }
 
@@ -246,7 +246,7 @@ void CustomPlayHead::synchronizeState()
         needsUpdate = true;
 
         // set the tempo relative note duration in the transport params
-        transportParams.updateParameter(IDS::tempo_speed, nextTempoSpeed);
+        transportParams.updateParameter(TRANSPORT::IDS::tempo_speed, nextTempoSpeed);
     }
 
     // check if the host has position info (but only if the host has play control)

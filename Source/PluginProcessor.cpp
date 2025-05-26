@@ -22,7 +22,7 @@ TransportExampleAudioProcessor::TransportExampleAudioProcessor()
                        )
 #endif
 {
-    transportParams = std::make_shared<TransportParameters>(*this, nullptr, IDS::transport_tree);
+    transportParams = std::make_shared<TransportParameters>(*this, nullptr, TRANSPORT::IDS::transport_tree);
 }
 
 TransportExampleAudioProcessor::~TransportExampleAudioProcessor()

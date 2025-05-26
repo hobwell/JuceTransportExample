@@ -10,54 +10,54 @@
 
 #include <JuceHeader.h>
 #include "UI_Transport.h"
-#include "TransportLayoutConstants.h"
+#include "TransportConstants.h"
 
 //==============================================================================
 UI_Transport::UI_Transport(TransportParameters& transportParams) :
     transportParams(transportParams),
-    spinTempoDuration(TEMPO::duration_options)
+    spinTempoDuration(TRANSPORT::TEMPO::duration_options)
 {
     // connect sliders to audio parameters
     // this will adjust the slider's range to match the parameter's range
-    attach_Tempo = transportParams.createSliderAttachment(IDS::tempo, spinTempo);
+    attach_Tempo = transportParams.createSliderAttachment(TRANSPORT::IDS::tempo, spinTempo);
     // let the slider know that it is attached to a parameter - needed for range checking
-    spinTempo.setAttachedParameter(transportParams.apvts.getParameter(IDS::tempo));
+    spinTempo.setAttachedParameter(transportParams.apvts.getParameter(TRANSPORT::IDS::tempo));
     // make control visible
     addAndMakeVisible(spinTempo);
 
-    attach_TempoOptions = transportParams.createSliderAttachment(IDS::tempo_speed, spinTempoDuration);
+    attach_TempoOptions = transportParams.createSliderAttachment(TRANSPORT::IDS::tempo_speed, spinTempoDuration);
     addAndMakeVisible(spinTempoDuration);
 
-    attach_BarLength = transportParams.createSliderAttachment(IDS::bar_length, spinBarLength);
+    attach_BarLength = transportParams.createSliderAttachment(TRANSPORT::IDS::bar_length, spinBarLength);
     // let the slider know that it is attached to a parameter - needed for range checking
-    spinBarLength.setAttachedParameter(transportParams.apvts.getParameter(IDS::bar_length));
+    spinBarLength.setAttachedParameter(transportParams.apvts.getParameter(TRANSPORT::IDS::bar_length));
     addAndMakeVisible(spinBarLength);
 
     lblTimeSigSep.setText("/", juce::dontSendNotification);
     addAndMakeVisible(lblTimeSigSep);
 
-    attach_BeatLength = transportParams.createSliderAttachment(IDS::beat_duration, spinBeatLength);
+    attach_BeatLength = transportParams.createSliderAttachment(TRANSPORT::IDS::beat_duration, spinBeatLength);
     // let the slider know that it is attached to a parameter - needed for range checking
-    spinBeatLength.setAttachedParameter(transportParams.apvts.getParameter(IDS::beat_duration));
+    spinBeatLength.setAttachedParameter(transportParams.apvts.getParameter(TRANSPORT::IDS::beat_duration));
     addAndMakeVisible(spinBeatLength);
 
-    attach_Pos_Bar = transportParams.createSliderAttachment(IDS::pos_bar, spinBars);
+    attach_Pos_Bar = transportParams.createSliderAttachment(TRANSPORT::IDS::pos_bar, spinBars);
     // let the slider know that it is attached to a parameter - needed for range checking
-    spinBars.setAttachedParameter(transportParams.apvts.getParameter(IDS::pos_bar));
+    spinBars.setAttachedParameter(transportParams.apvts.getParameter(TRANSPORT::IDS::pos_bar));
     addAndMakeVisible(spinBars);
 
-    attach_Pos_Beat = transportParams.createSliderAttachment(IDS::pos_beat, spinBeats);
+    attach_Pos_Beat = transportParams.createSliderAttachment(TRANSPORT::IDS::pos_beat, spinBeats);
     // let the slider know that it is attached to a parameter - needed for range checking
-    spinBeats.setAttachedParameter(transportParams.apvts.getParameter(IDS::pos_beat));
+    spinBeats.setAttachedParameter(transportParams.apvts.getParameter(TRANSPORT::IDS::pos_beat));
     addAndMakeVisible(spinBeats);
 
-    attach_Pos_Div = transportParams.createSliderAttachment(IDS::pos_div, spinBeatDivisions);
+    attach_Pos_Div = transportParams.createSliderAttachment(TRANSPORT::IDS::pos_div, spinBeatDivisions);
     // let the slider know that it is attached to a parameter - needed for range checking
-    spinBeatDivisions.setAttachedParameter(transportParams.apvts.getParameter(IDS::pos_div));
+    spinBeatDivisions.setAttachedParameter(transportParams.apvts.getParameter(TRANSPORT::IDS::pos_div));
     addAndMakeVisible(spinBeatDivisions);
 
     attach_Timeline_ppq = transportParams.createGenericAttachment(
-        IDS::ppq,
+        TRANSPORT::IDS::ppq,
         transportTimeline,
         [&] (float ppq) { transportTimeline.setTransportPosition(ppq); },
         [&] (std::function<void(float)> f) { 
@@ -65,7 +65,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
         }
     );
     attach_Timeline_playing = transportParams.createGenericAttachment(
-        IDS::playing,
+        TRANSPORT::IDS::playing,
         transportTimeline,
         [&] (bool playing) 
         { 
@@ -75,13 +75,13 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
         [] (std::function<void(float)>) {}  // Explicitly does nothing
     );
     attach_Timeline_barLength = transportParams.createGenericAttachment(
-        IDS::bar_length,
+        TRANSPORT::IDS::bar_length,
         transportTimeline,
         [&] (int barLength) { transportTimeline.setBarLength(barLength); },
         [] (std::function<void(float)>) {}  // Explicitly does nothing
     );
     attach_Timeline_beatDuration = transportParams.createGenericAttachment(
-        IDS::beat_duration,
+        TRANSPORT::IDS::beat_duration,
         transportTimeline,
         [&] (int beatDuration) 
         { 
@@ -106,7 +106,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
         }
     );
     attach_Timeline_bar = transportParams.createGenericAttachment(
-        IDS::pos_bar,
+        TRANSPORT::IDS::pos_bar,
         spinBars,
         [&] (float bar) {}, // Explicitly does nothing
         [&] (std::function<void(float)> f)
@@ -116,7 +116,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
         }
     );
     attach_Timeline_beat = transportParams.createGenericAttachment(
-        IDS::pos_beat,
+        TRANSPORT::IDS::pos_beat,
         spinBeats,
         [&] (float beat) {}, // Explicitly does nothing
         [&] (std::function<void(float)> f)
@@ -126,7 +126,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
         }
     );
     attach_Timeline_division = transportParams.createGenericAttachment(
-        IDS::pos_div,
+        TRANSPORT::IDS::pos_div,
         spinBeatDivisions,
         [&] (float div) {}, // Explicitly does nothing
         [&] (std::function<void(float)> f)
@@ -159,7 +159,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
         };
 
     // connect the play button to the "playing" audio parameter
-    attach_Play = transportParams.createButtonAttachment(IDS::playing, btnPlay);
+    attach_Play = transportParams.createButtonAttachment(TRANSPORT::IDS::playing, btnPlay);
 
     btnPlay.setLookAndFeel(&fontAwesome);
     btnPlay.setButtonText(fontAwesome.icon_play);
@@ -183,11 +183,11 @@ void UI_Transport::layout()
     auto desktopArea = desktop.getDisplays().getMainDisplay().totalArea; // TODO: use this information to scale the transport view (e.g. for 4k displays)
 
     auto body = getLocalBounds();
-    int p = LAYOUT::TRANSPORT::PADDING; // padding
+    int p = TRANSPORT::LAYOUT::PADDING; // padding
     int pp = p * 2; // double padding - added to width and height to account for padding on all sides
-    int h = LAYOUT::TRANSPORT::HEIGHT;
+    int h = TRANSPORT::LAYOUT::HEIGHT;
     int w = body.getWidth();
-    int bw = LAYOUT::TRANSPORT::BUTTON::WIDTH;
+    int bw = TRANSPORT::LAYOUT::BUTTON::WIDTH;
 
     // define the inner area of the component
     auto area = body.removeFromTop(h + pp).removeFromLeft(getWidth()); // transport should take the full width
@@ -215,7 +215,7 @@ void UI_Transport::layout()
     spinBeats.setBounds(posArea.removeFromLeft(30));
     spinBeatDivisions.setBounds(posArea.removeFromLeft(30));
 
-    transportTimeline.setBounds(body.removeFromTop(LAYOUT::TRANSPORT::TIMELINE::HEIGHT).reduced(p));
+    transportTimeline.setBounds(body.removeFromTop(TRANSPORT::LAYOUT::TIMELINE::HEIGHT).reduced(p));
 }
 
 void UI_Transport::paint(juce::Graphics& g)
