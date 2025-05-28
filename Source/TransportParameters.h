@@ -21,7 +21,10 @@ struct TransportParameters :
     juce::ValueTree::Listener,
     juce::Timer
 {
-    juce::AudioProcessorValueTreeState _apvts;
+
+    TransportParameters(juce::UndoManager* undoManager, juce::AudioProcessorValueTreeState& apvts);
+    ~TransportParameters();
+
     juce::AudioProcessorValueTreeState& apvts;
 
     juce::AudioProcessorValueTreeState::ParameterLayout parameters;
@@ -51,12 +54,11 @@ struct TransportParameters :
     juce::CachedValue<float> tempo {apvts.state, TRANSPORT::IDS::tempo, undoManager, 120.f};
     juce::CachedValue<float> tempo_speed {apvts.state, TRANSPORT::IDS::tempo_speed, undoManager, 0.25f};
 
-    TransportParameters(juce::AudioProcessor& processor, juce::UndoManager* undoManager, const juce::Identifier& valueTreeType);
-    ~TransportParameters();
-
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> createButtonAttachment(const juce::String& parameterID, juce::Button& button);
     std::unique_ptr<GenericComponentAttachment> createGenericAttachment(const juce::String& parameterID, juce::Component& component, std::function<void(float)> paramToUi, std::function<void(std::function<void(float)>)> uiToParam);
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> createSliderAttachment(const juce::String& parameterID, juce::Slider& slider);
+    
+    static std::unique_ptr<juce::AudioProcessorParameterGroup>  createParameters();
 
     void flushPendingUpdates();
     float getPpq();
@@ -153,8 +155,6 @@ private:
     // When updateParameter() is called, it just overwrites the last update for that parameterId.
     // If multiple calls happen, only the last value stays in the queue.
     mutable std::unordered_map<juce::String, std::function<void()>> pendingUpdates;
-    
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TransportParameters)
 };

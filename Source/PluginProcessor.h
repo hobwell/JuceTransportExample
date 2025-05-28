@@ -28,7 +28,9 @@ public:
     // so it makes sense to use a single transport tree for all instances.  I 
     // decided that this limitation should also be applied when running in 
     // standalone mode.
+    std::unique_ptr<juce::AudioProcessorValueTreeState> apvts; // must appear before transport Params for proper deconstruction
     std::shared_ptr<TransportParameters> transportParams;
+
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;

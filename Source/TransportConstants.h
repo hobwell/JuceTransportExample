@@ -63,6 +63,7 @@ namespace TRANSPORT
         const juce::String tempo ("tempo");
         const juce::String tempo_speed ("tempo_speed"); // tempo speed refers to the relative note duration (e.g. tempo speed = q to indicate time relative to quarter notes)
         const juce::String time_sig_controls_tempo_speed ("time_sig_controls_tempo_speed");
+        const juce::String transport_group ("transport");
         const juce::String transport_tree ("transport_tree");
     }
 
@@ -89,6 +90,7 @@ namespace TRANSPORT
         const juce::String tempo ("Tempo");
         const juce::String tempo_speed ("Tempo Duration");
         const juce::String time_sig_controls_tempo_speed("Time Signature Controls Tempo Note Duration");
+        const juce::String transport_group ("Transport");
     }
 
     namespace TEMPO

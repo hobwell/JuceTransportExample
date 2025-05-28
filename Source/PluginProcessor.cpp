@@ -22,7 +22,15 @@ TransportExampleAudioProcessor::TransportExampleAudioProcessor()
                        )
 #endif
 {
-    transportParams = std::make_shared<TransportParameters>(*this, nullptr, TRANSPORT::IDS::transport_tree);
+    auto transportGroup = TransportParameters::createParameters();
+
+    // Add groups to a layout
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    layout.add(std::move(transportGroup));
+    
+    apvts = std::make_unique<juce::AudioProcessorValueTreeState>(*this, nullptr, juce::Identifier(TRANSPORT::IDS::transport_tree), std::move(layout));
+
+    transportParams = std::make_shared<TransportParameters>(nullptr, *apvts);
 }
 
 TransportExampleAudioProcessor::~TransportExampleAudioProcessor()
