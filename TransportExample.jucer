@@ -27,6 +27,10 @@
               file="Source/TransportConstants.h"/>
       </GROUP>
       <GROUP id="{D020E1CD-FE85-0E00-D4B5-8501DBF540A3}" name="Parameters">
+        <FILE id="UpLzGI" name="ParameterGroup.cpp" compile="1" resource="0"
+              file="Source/ParameterGroup.cpp"/>
+        <FILE id="DWpIa2" name="ParameterGroup.h" compile="0" resource="0"
+              file="Source/ParameterGroup.h"/>
         <FILE id="LVjJ6c" name="TransportParameters.cpp" compile="1" resource="0"
               file="Source/TransportParameters.cpp"/>
         <FILE id="tWZn2W" name="TransportParameters.h" compile="0" resource="0"

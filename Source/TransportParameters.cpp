@@ -13,17 +13,9 @@
 // struct TransportParameters
 
 TransportParameters::TransportParameters(juce::UndoManager* undoManager, juce::AudioProcessorValueTreeState& apvts) :
-    undoManager(undoManager),
-    apvts(apvts)
-{
-    apvts.state.addListener(this);
-    startTimerHz(30);
-}
+    ParameterGroup(undoManager, apvts) {}
 
-TransportParameters::~TransportParameters()
-{
-    apvts.state.removeListener(this);
-}
+TransportParameters::~TransportParameters() {}
 
 std::unique_ptr<juce::AudioProcessorParameterGroup>  TransportParameters::createParameters()
 {
@@ -71,35 +63,6 @@ std::unique_ptr<juce::AudioProcessorParameterGroup>  TransportParameters::create
     return group;
 }
 
-std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> TransportParameters::createButtonAttachment(const juce::String& parameterID, juce::Button& button)
-{
-    return std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(apvts, parameterID, button);
-}
-
-std::unique_ptr<GenericComponentAttachment> TransportParameters::createGenericAttachment(const juce::String& parameterID, juce::Component& component, std::function<void(float)> paramToUi, std::function<void(std::function<void(float)>)> uiToParam)
-{
-    return std::make_unique<GenericComponentAttachment>(apvts, parameterID, component, paramToUi, uiToParam);
-}
-
-std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> TransportParameters::createSliderAttachment(const juce::String& parameterID, juce::Slider& slider)
-{
-    return std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, parameterID, slider);
-}
-
-void TransportParameters::flushPendingUpdates()
-{
-    std::unordered_map<juce::String, std::function<void()>> updatesToApply;
-
-    {
-        juce::SpinLock::ScopedLockType lock(pendingUpdatesLock);
-        updatesToApply = std::move(pendingUpdates);
-        pendingUpdates.clear();
-    }
-
-    for (auto& [paramId, updater] : updatesToApply)
-        updater(); // safely call them OUTSIDE the lock
-}
-
 float TransportParameters::getPpq()
 {
     return *apvts.getRawParameterValue(TRANSPORT::IDS::ppq);
@@ -125,45 +88,4 @@ void TransportParameters::setPos(float ppq, bool forceUpdate)
     updateParameter(TRANSPORT::IDS::pos_bar, 1 + ((int) beatPosition / bar_length), forceUpdate);
     updateParameter(TRANSPORT::IDS::pos_beat, 1 + ((int) beatPosition % bar_length), forceUpdate);
     updateParameter(TRANSPORT::IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat), forceUpdate);
-}
-
-void TransportParameters::timerCallback()
-{
-    // flush any pending updates
-    flushPendingUpdates();
-}
-
-/// <summary>
-/// Respond to changes in the APVTS
-/// </summary>
-/// <remarks>
-/// When a parameter in the tree changes, this method will trigger on every 
-/// instance of the wrapper - consider passing a single instance of the 
-/// wrapper around, rather than creating multiple instances.
-/// </remarks>
-void TransportParameters::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property)
-{
-
-    // When parameters are changed by attachments, the value tree is not automatically update, so we have to manually sync the values.
-    if (treeWhosePropertyHasChanged.hasType("PARAM") && property == juce::Identifier("value"))
-    {
-        const auto changePropertyId = treeWhosePropertyHasChanged.getProperty("id");
-
-        if (!changePropertyId.isString())
-            return;
-
-        const auto paramId = juce::Identifier(changePropertyId.toString());
-        const auto newValue = treeWhosePropertyHasChanged.getProperty("value");
-
-        if (apvts.state.getProperty(paramId) != newValue)
-        {
-            apvts.state.setProperty(paramId, newValue, nullptr);
-            // DBG("Synced param '" << paramId.toString() << "' to transport_tree: " << newValue.toString());
-        }
-    }
-
-    if (treeWhosePropertyHasChanged == apvts.state)
-    {
-        // DBG("Property changed: " << property.toString() << " = " << apvts.state.getProperty(property).toString());
-    }
 }
