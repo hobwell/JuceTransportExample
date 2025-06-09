@@ -70,7 +70,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
         [&] (bool playing) 
         { 
             transportTimeline.setPlaying(playing);
-            setupPosition(transportParams.host_controls_playing || playing);
+            setupPosition(*transportParams.host_controls_playing || playing);
         },
         [] (std::function<void(float)>) {}  // Explicitly does nothing
     );
@@ -140,10 +140,10 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
     // setup handlers, after all parameters have been attached
 
     // if the arbiter of the tempo changes, re-initialize the tempo setup
-    setupTempo(transportParams.host_controls_tempo);
-    setupTempoRelativeNoteDuration(transportParams.host_controls_tempo_speed);
-    setupTimeSignature(transportParams.host_controls_time_signature);
-    setupPosition(transportParams.host_controls_position);
+    setupTempo(*transportParams.host_controls_tempo);
+    setupTempoRelativeNoteDuration(*transportParams.host_controls_tempo_speed);
+    setupTimeSignature(*transportParams.host_controls_time_signature);
+    setupPosition(*transportParams.host_controls_position);
 
     btnRewind.setLookAndFeel(&fontAwesome);
     btnRewind.setButtonText(fontAwesome.icon_backward);
@@ -154,7 +154,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
     addAndMakeVisible(btnRewind);
     btnRewind.onClick = [this]
         {
-            this->transportParams.reposition_flag = true;
+            *this->transportParams.reposition_flag = true;
             this->transportParams.setPpq(0.f);
         };
 
@@ -171,7 +171,7 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
     addAndMakeVisible(btnPlay);
 
     // initialize the playing setup
-    setupPlayControl(transportParams.host_controls_playing);
+    setupPlayControl(*transportParams.host_controls_playing);
 
 }
 
@@ -253,7 +253,7 @@ void UI_Transport::setupPlayControl(bool hostControls)
             if (!this->transportParams.host_controls_playing)
             {
                 // also set the transport playing state
-                this->transportParams.playing = btnPlay.getToggleState();
+                *this->transportParams.playing = btnPlay.getToggleState();
             }
         };
 }
@@ -348,17 +348,17 @@ void UI_Transport::setupTimeSignature(bool hostControls)
 
 void UI_Transport::updatePpqFromUI(std::function<void(float)> f)
 {
-    int subDivisionsPerBeat = 16 / transportParams.beat_duration;
-    float quarterNotesPerBeat = 4.0f / transportParams.beat_duration;
+    int subDivisionsPerBeat = 16 / *transportParams.beat_duration;
+    float quarterNotesPerBeat = 4.0f / *transportParams.beat_duration;
 
     int barIndex = spinBars.getValue() - 1;
     int beatIndex = spinBeats.getValue() - 1;
     int divIndex = spinBeatDivisions.getValue() - 1;
 
-    float totalBeats = barIndex * transportParams.bar_length + beatIndex + (float) divIndex / subDivisionsPerBeat;
+    float totalBeats = barIndex * *transportParams.bar_length + beatIndex + (float) divIndex / subDivisionsPerBeat;
     ppq = totalBeats * quarterNotesPerBeat;
 
     DBG(ppq);
-    transportParams.reposition_flag = true;
+    *transportParams.reposition_flag = true;
     transportParams.setPpq(ppq);
 }

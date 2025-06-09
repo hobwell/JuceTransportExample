@@ -15,7 +15,7 @@
 
 /// <summary>
 /// Contains and initializes an AudioProcessorValueTreeState for the transport 
-/// parameters of the plugin.
+/// parameters of the plugin, with flexible state rebinding.
 /// </summary>
 struct TransportParameters :
     ParameterGroup
@@ -24,29 +24,31 @@ struct TransportParameters :
     TransportParameters(juce::UndoManager* undoManager, juce::AudioProcessorValueTreeState& apvts);
     ~TransportParameters();
 
-    juce::CachedValue<bool> host_controls_playing {apvts.state, TRANSPORT::IDS::host_controls_play, undoManager, false};
-    juce::CachedValue<bool> host_controls_position {apvts.state, TRANSPORT::IDS::host_controls_position, undoManager, false};
-    juce::CachedValue<bool> host_controls_tempo {apvts.state, TRANSPORT::IDS::host_controls_tempo, undoManager, false};
-    juce::CachedValue<bool> host_controls_tempo_speed {apvts.state, TRANSPORT::IDS::host_controls_tempo_speed, undoManager, false};
-    juce::CachedValue<bool> host_controls_time_signature {apvts.state, TRANSPORT::IDS::host_controls_time_sig, undoManager, false};
-    juce::CachedValue<bool> time_sig_controls_tempo_speed {apvts.state, TRANSPORT::IDS::time_sig_controls_tempo_speed, undoManager, false};
+    void attachToState(juce::ValueTree& state, juce::UndoManager* undoManager);
+
+    std::unique_ptr<juce::CachedValue<bool>> host_controls_playing;
+    std::unique_ptr<juce::CachedValue<bool>> host_controls_position;
+    std::unique_ptr<juce::CachedValue<bool>> host_controls_tempo;
+    std::unique_ptr<juce::CachedValue<bool>> host_controls_tempo_speed;
+    std::unique_ptr<juce::CachedValue<bool>> host_controls_time_signature;
+    std::unique_ptr<juce::CachedValue<bool>> time_sig_controls_tempo_speed;
     
-    juce::CachedValue<int> bar_length {apvts.state, TRANSPORT::IDS::bar_length, undoManager, 4};
-    juce::CachedValue<int> beat_duration {apvts.state, TRANSPORT::IDS::beat_duration, undoManager, 4};
-    juce::CachedValue<bool> playing {apvts.state, TRANSPORT::IDS::playing, undoManager, false};
-    juce::CachedValue<bool> reposition_flag {apvts.state, TRANSPORT::IDS::reposition_flag, undoManager, false};
+    std::unique_ptr<juce::CachedValue<int>> bar_length;
+    std::unique_ptr<juce::CachedValue<int>> beat_duration;
+    std::unique_ptr<juce::CachedValue<bool>> playing;
+    std::unique_ptr<juce::CachedValue<bool>> reposition_flag;
 
     // ppq is not a good candidate for a cached value, as it is frequently updated
     // juce::CachedValue<float> ppq{ apvts.state, TRANSPORT::IDS::ppq, undoManager, 0.f };
 
     // pos_* are not good candidates for cached values, as they are frequently updated
-    juce::CachedValue<float> pos_bar{ apvts.state, TRANSPORT::IDS::pos_bar, undoManager, 0.f };
-    juce::CachedValue<float> pos_beat{ apvts.state, TRANSPORT::IDS::pos_beat, undoManager, 0.f };
-    juce::CachedValue<float> pos_div{ apvts.state, TRANSPORT::IDS::pos_div, undoManager, 0.f };
+    std::unique_ptr<juce::CachedValue<float>> pos_bar;
+    std::unique_ptr<juce::CachedValue<float>> pos_beat;
+    std::unique_ptr<juce::CachedValue<float>> pos_div;
 
-    juce::CachedValue<float> sample_rate {apvts.state, TRANSPORT::IDS::sample_rate, undoManager, 384000.f};
-    juce::CachedValue<float> tempo {apvts.state, TRANSPORT::IDS::tempo, undoManager, 120.f};
-    juce::CachedValue<float> tempo_speed {apvts.state, TRANSPORT::IDS::tempo_speed, undoManager, 0.25f};
+    std::unique_ptr<juce::CachedValue<float>> sample_rate;
+    std::unique_ptr<juce::CachedValue<float>> tempo;
+    std::unique_ptr<juce::CachedValue<float>> tempo_speed;
 
     static std::unique_ptr<juce::AudioProcessorParameterGroup>  createParameters();
 

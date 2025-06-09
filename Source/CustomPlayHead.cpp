@@ -17,19 +17,19 @@ CustomPlayHead::CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, 
     sampleRate(sampleRateIn)
 {
     // initialize all the transport parameters (to get them into the tree)
-    transportParams.bar_length = 4;
-    transportParams.beat_duration = 4;
-    transportParams.host_controls_playing = false;
-    transportParams.host_controls_position = false;
-    transportParams.host_controls_tempo = false;
-    transportParams.host_controls_tempo_speed = false;
-    transportParams.host_controls_time_signature = false;
-    transportParams.playing = false;
-    transportParams.reposition_flag = false;
-    transportParams.sample_rate = sampleRate;
-    transportParams.tempo = 120.f;
-    transportParams.tempo_speed = 0.25f; // 1/4 note duration
-    transportParams.time_sig_controls_tempo_speed = false;
+    *transportParams.bar_length = 4;
+    *transportParams.beat_duration = 4;
+    *transportParams.host_controls_playing = false;
+    *transportParams.host_controls_position = false;
+    *transportParams.host_controls_tempo = false;
+    *transportParams.host_controls_tempo_speed = false;
+    *transportParams.host_controls_time_signature = false;
+    *transportParams.playing = false;
+    *transportParams.reposition_flag = false;
+    *transportParams.sample_rate = sampleRate;
+    *transportParams.tempo = 120.f;
+    *transportParams.tempo_speed = 0.25f; // 1/4 note duration
+    *transportParams.time_sig_controls_tempo_speed = false;
 
     // check if the host is a standalone app
     isStandalone = juce::JUCEApplicationBase::isStandaloneApp();
@@ -54,7 +54,7 @@ void CustomPlayHead::changePosition() const
     timeNs = ppq * samplesPerBeat * beatsPerQuarterNote * 1e9 / sampleRate;
     
     // clear the reposition flag
-    transportParams.reposition_flag = false;
+    *transportParams.reposition_flag = false;
     updatePosition();
 }
 
@@ -65,12 +65,12 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition() 
 {
     if (isPlaying)
     {
-        if (transportParams.host_controls_playing && processor.getPlayHead()->getPosition().hasValue())
+        if (*transportParams.host_controls_playing && processor.getPlayHead()->getPosition().hasValue())
         {
             hostInfo = *processor.getPlayHead()->getPosition();
 
             // if the host provides a value, use it, otherwise fall back to the internal value
-            if (transportParams.host_controls_playing && hostInfo.getHostTimeNs().hasValue())
+            if (*transportParams.host_controls_playing && hostInfo.getHostTimeNs().hasValue())
             {
                 timeNs = *hostInfo.getHostTimeNs();
             }
@@ -79,12 +79,12 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition() 
                 timeNs += bufferSize * 1e9 / sampleRate;
             }
 
-            if (transportParams.host_controls_tempo && hostInfo.getBpm().hasValue())
+            if (*transportParams.host_controls_tempo && hostInfo.getBpm().hasValue())
             {
                 tempo = *hostInfo.getBpm();
             }
 
-            if (transportParams.host_controls_position && hostInfo.getPpqPosition().hasValue())
+            if (*transportParams.host_controls_position && hostInfo.getPpqPosition().hasValue())
             {
                 ppq = *hostInfo.getPpqPosition();
             }
@@ -93,7 +93,7 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition() 
                 ppq += bufferSize / (samplesPerBeat * beatsPerQuarterNote);
             }
 
-            if (transportParams.host_controls_position && hostInfo.getTimeInSamples().hasValue())
+            if (*transportParams.host_controls_position && hostInfo.getTimeInSamples().hasValue())
             {
                 bufferStart = *hostInfo.getTimeInSamples();
             }
@@ -139,7 +139,7 @@ void CustomPlayHead::recalculate() const
 */
 void CustomPlayHead::synchronizeState()
 {
-    if (transportParams.reposition_flag)
+    if (*transportParams.reposition_flag)
     {
         changePosition();
     }
@@ -149,13 +149,13 @@ void CustomPlayHead::synchronizeState()
     // assumption: all hosts (outside standalone) will provide at least the playing state
     if (isStandalone)
     {
-        nextPlaying = transportParams.playing;
-        transportParams.host_controls_playing = false;
+        nextPlaying = *transportParams.playing;
+        *transportParams.host_controls_playing = false;
     }
     else
     {
         nextPlaying = hostInfo.getIsPlaying();
-        transportParams.host_controls_playing = true;
+        *transportParams.host_controls_playing = true;
     }
 
     // check if the playing state has changed
@@ -164,7 +164,7 @@ void CustomPlayHead::synchronizeState()
         isPlaying = !isPlaying;
         // set the playing state in the transport params
         //updateParameter(IDS::playing, isPlaying);
-        transportParams.playing = isPlaying;
+        *transportParams.playing = isPlaying;
         DBG("TParam: " << *transportParams.apvts.getRawParameterValue(TRANSPORT::IDS::playing));
     }
 
@@ -172,12 +172,12 @@ void CustomPlayHead::synchronizeState()
     if (hostInfo.getBpm().hasValue())
     {
         nextTempo = *hostInfo.getBpm();
-        transportParams.host_controls_tempo = true;
+        *transportParams.host_controls_tempo = true;
     }
     else
     {
         nextTempo = transportParams.apvts.getRawParameterValue(TRANSPORT::IDS::tempo)->load();
-        transportParams.host_controls_tempo = false;
+        *transportParams.host_controls_tempo = false;
     }
 
     // check if the tempo has changed
@@ -185,7 +185,7 @@ void CustomPlayHead::synchronizeState()
     {
         tempo = nextTempo;
         needsUpdate = true;
-        if (transportParams.host_controls_tempo)
+        if (*transportParams.host_controls_tempo)
         {
             // set the tempo in the transport params
             transportParams.updateParameter(TRANSPORT::IDS::tempo, nextTempo);
@@ -196,24 +196,24 @@ void CustomPlayHead::synchronizeState()
     if (hostInfo.getTimeSignature().hasValue())
     {
         nextTimeSig = *hostInfo.getTimeSignature();
-        transportParams.host_controls_time_signature = true;
+        *transportParams.host_controls_time_signature = true;
         //updateParameter(IDS::host_controls_time_sig, true);
         // TODO - need to know if all DAWs do this:
         //updateParameter(IDS::host_controls_tempo_speed, true);
-        transportParams.host_controls_tempo_speed = true;
+        *transportParams.host_controls_tempo_speed = true;
         //updateParameter(IDS::time_sig_controls_tempo_speed, true);
-        transportParams.time_sig_controls_tempo_speed = true;
+        *transportParams.time_sig_controls_tempo_speed = true;
     }
     else
     {
-        nextTimeSig.numerator = transportParams.bar_length;
-        nextTimeSig.denominator = transportParams.beat_duration;
+        nextTimeSig.numerator = *transportParams.bar_length;
+        nextTimeSig.denominator = *transportParams.beat_duration;
         //updateParameter(IDS::host_controls_time_sig, false);
-        transportParams.host_controls_time_signature = false;
+        *transportParams.host_controls_time_signature = false;
         transportParams.updateParameter(TRANSPORT::IDS::host_controls_tempo_speed, false);
-        transportParams.host_controls_tempo_speed = false;
+        *transportParams.host_controls_tempo_speed = false;
         transportParams.updateParameter(TRANSPORT::IDS::time_sig_controls_tempo_speed, false);
-        transportParams.time_sig_controls_tempo_speed = false;
+        *transportParams.time_sig_controls_tempo_speed = false;
     }
 
     // check if the time signature has changed
@@ -230,14 +230,14 @@ void CustomPlayHead::synchronizeState()
     }
 
     // check if tempo relative note duration has changed
-    if (transportParams.time_sig_controls_tempo_speed)
+    if (*transportParams.time_sig_controls_tempo_speed)
     {
         // set the tempo relative note duration based on the time signature
         nextTempoSpeed = 1.f / timeSig.denominator;
     }
     else
     {
-        nextTempoSpeed = transportParams.tempo_speed;
+        nextTempoSpeed = *transportParams.tempo_speed;
     }
 
     if (tempoSpeed != nextTempoSpeed)
@@ -250,13 +250,13 @@ void CustomPlayHead::synchronizeState()
     }
 
     // check if the host has position info (but only if the host has play control)
-    if (transportParams.host_controls_playing && (hostInfo.getPpqPosition().hasValue() || hostInfo.getTimeInSamples().hasValue() || hostInfo.getHostTimeNs().hasValue() || hostInfo.getTimeInSeconds().hasValue()))
+    if (*transportParams.host_controls_playing && (hostInfo.getPpqPosition().hasValue() || hostInfo.getTimeInSamples().hasValue() || hostInfo.getHostTimeNs().hasValue() || hostInfo.getTimeInSeconds().hasValue()))
     {
-        transportParams.host_controls_position = true;
+        *transportParams.host_controls_position = true;
     }
     else
     {
-        transportParams.host_controls_position = false;
+        *transportParams.host_controls_position = false;
     }
 
     if (needsUpdate)

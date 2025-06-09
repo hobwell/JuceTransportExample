@@ -13,9 +13,31 @@
 // struct TransportParameters
 
 TransportParameters::TransportParameters(juce::UndoManager* undoManager, juce::AudioProcessorValueTreeState& apvts) :
-    ParameterGroup(undoManager, apvts) {}
+    ParameterGroup(undoManager, apvts) {
+    attachToState(apvts.state, undoManager);
+}
 
 TransportParameters::~TransportParameters() {}
+
+void TransportParameters::attachToState(juce::ValueTree& state, juce::UndoManager* undoManager)
+{
+    beat_duration = std::make_unique<juce::CachedValue<int>>  (state, TRANSPORT::IDS::beat_duration, undoManager, 4);
+    bar_length = std::make_unique<juce::CachedValue<int>>     (state, TRANSPORT::IDS::bar_length, undoManager, 4);
+    host_controls_playing = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::host_controls_play, undoManager, false);
+    host_controls_position = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::host_controls_position, undoManager, false);
+    host_controls_tempo = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::host_controls_tempo, undoManager, false);
+    host_controls_tempo_speed = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::host_controls_tempo_speed, undoManager, false);
+    host_controls_time_signature = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::host_controls_time_sig, undoManager, false);
+    reposition_flag = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::reposition_flag, undoManager, false);
+    playing = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::playing, undoManager, false);
+    time_sig_controls_tempo_speed = std::make_unique<juce::CachedValue<bool>>(state, TRANSPORT::IDS::time_sig_controls_tempo_speed, undoManager, false);
+    pos_bar = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::pos_bar, undoManager, 1.f);
+    pos_beat = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::pos_beat, undoManager, 1.f);
+    pos_div = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::pos_div, undoManager, 1.f);
+    sample_rate = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::sample_rate, undoManager, 48000.f);
+    tempo = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::tempo, undoManager, 120.f);
+    tempo_speed = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::tempo_speed, undoManager, 0.25f);
+}
 
 std::unique_ptr<juce::AudioProcessorParameterGroup>  TransportParameters::createParameters()
 {
@@ -76,16 +98,16 @@ void TransportParameters::setPpq(float ppq)
 void TransportParameters::setPos(float ppq, bool forceUpdate)
 {
     // Calculate the number of subdivisions per beat based on beat_duration
-    int subDivisionsPerBeat = 16 / beat_duration;  // This adjusts based on beat duration
+    int subDivisionsPerBeat = 16 / *beat_duration;  // This adjusts based on beat duration
 
     // Calculate the scaler for converting PPQ to beats based on beat duration
-    float quarterNotesPerBeat = 4.0f / beat_duration; // Adjust beat rate based on beat duration
+    float quarterNotesPerBeat = 4.0f / *beat_duration; // Adjust beat rate based on beat duration
 
     // convert ppq to number of total beats, based on the beat duration
     float beatPosition = ppq / quarterNotesPerBeat;
 
     updateParameter(TRANSPORT::IDS::ppq, ppq);
-    updateParameter(TRANSPORT::IDS::pos_bar, 1 + ((int) beatPosition / bar_length), forceUpdate);
-    updateParameter(TRANSPORT::IDS::pos_beat, 1 + ((int) beatPosition % bar_length), forceUpdate);
+    updateParameter(TRANSPORT::IDS::pos_bar, 1 + ((int) beatPosition / *bar_length), forceUpdate);
+    updateParameter(TRANSPORT::IDS::pos_beat, 1 + ((int) beatPosition % *bar_length), forceUpdate);
     updateParameter(TRANSPORT::IDS::pos_div, 1 + ((int) (beatPosition * subDivisionsPerBeat) % subDivisionsPerBeat), forceUpdate);
 }
