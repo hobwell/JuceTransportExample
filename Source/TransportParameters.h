@@ -48,10 +48,11 @@ struct TransportParameters :
 
     std::unique_ptr<juce::CachedValue<float>> sample_rate;
     std::unique_ptr<juce::CachedValue<float>> tempo;
-    std::unique_ptr<juce::CachedValue<float>> tempo_speed;
+    std::unique_ptr<juce::CachedValue<float>> tempo_speed;  // what the tempo is relative to (e.g. 1/4 is a quarter note, 1/8 is an eighth note, etc.)
 
     static std::unique_ptr<juce::AudioProcessorParameterGroup>  createParameters();
 
+    double calculateTempoRelativeSamples(float duration) const; // given a duration (relative to a whole note) calculate the number of samples, given the current tempo, tempo speed and sample rate
     float getPpq();
     void setPpq(float ppq);
     void setPos(float ppq, bool forceUpdate = false);
