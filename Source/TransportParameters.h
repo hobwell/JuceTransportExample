@@ -52,7 +52,6 @@ struct TransportParameters :
 
     static std::unique_ptr<juce::AudioProcessorParameterGroup>  createParameters();
 
-    double calculateTempoRelativeSamples(float duration) const; // given a duration (relative to a whole note) calculate the number of samples, given the current tempo, tempo speed and sample rate
     float getPpq();
     void setPpq(float ppq);
     void setPos(float ppq, bool forceUpdate = false);

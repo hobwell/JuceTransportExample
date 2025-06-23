@@ -85,19 +85,6 @@ std::unique_ptr<juce::AudioProcessorParameterGroup>  TransportParameters::create
     return group;
 }
 
-// given a duration (relative to a whole note) calculate the number of samples, given the current tempo, tempo speed and sample rate
-double TransportParameters::calculateTempoRelativeSamples(float duration) const
-{
-    // Get the current tempo and tempo speed
-    float currentTempo = *tempo;
-    float currentTempoSpeed = *tempo_speed;
-    // Calculate the duration in seconds for the given duration relative to a whole note
-    double durationInSeconds = (60.0 / currentTempo) * duration * currentTempoSpeed;
-    // Calculate the number of samples based on the sample rate
-    double sampleRate = *sample_rate;
-    return durationInSeconds * sampleRate;
-}
-
 float TransportParameters::getPpq()
 {
     return *apvts.getRawParameterValue(TRANSPORT::IDS::ppq);
