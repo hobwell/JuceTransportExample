@@ -44,15 +44,15 @@ CustomPlayHead::~CustomPlayHead() {}
 */
 void CustomPlayHead::changePosition() const
 {
-    // clear buffer position? - not sure if we should do this...
-    bufferEnd = 0;
-    bufferStart = 0;
     // get the current ppq position according to the transport
     ppq = transportParams.getPpq();
 
+    // calculate the current buffer position
+    bufferPos = ppq * samplesPerBeat * beatsPerQuarterNote;
+
     // calculate the current time position
-    timeNs = ppq * samplesPerBeat * beatsPerQuarterNote * 1e9 / sampleRate;
-    
+    timeNs = (bufferPos / sampleRate) * 1e9;
+
     // clear the reposition flag
     *transportParams.reposition_flag = false;
     updatePosition();
@@ -69,45 +69,31 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition() 
         {
             hostInfo = *processor.getPlayHead()->getPosition();
 
-            // if the host provides a value, use it, otherwise fall back to the internal value
-            if (*transportParams.host_controls_playing && hostInfo.getHostTimeNs().hasValue())
+            if (*transportParams.host_controls_position)
             {
-                timeNs = *hostInfo.getHostTimeNs();
-            }
-            else
-            {
-                timeNs += bufferSize * 1e9 / sampleRate;
+                if (hostInfo.getTimeInSamples().hasValue())
+                {
+                    bufferPos = *hostInfo.getTimeInSamples();
+                }
+
+                if (hostInfo.getHostTimeNs().hasValue())
+                {
+                    timeNs = *hostInfo.getHostTimeNs();
+                }
+            
+                if (hostInfo.getPpqPosition().hasValue())
+                {
+                    ppq = *hostInfo.getPpqPosition();
+                }
             }
 
             if (*transportParams.host_controls_tempo && hostInfo.getBpm().hasValue())
             {
                 tempo = *hostInfo.getBpm();
             }
-
-            if (*transportParams.host_controls_position && hostInfo.getPpqPosition().hasValue())
-            {
-                ppq = *hostInfo.getPpqPosition();
-            }
-            else
-            {
-                ppq += bufferSize / (samplesPerBeat * beatsPerQuarterNote);
-            }
-
-            if (*transportParams.host_controls_position && hostInfo.getTimeInSamples().hasValue())
-            {
-                bufferStart = *hostInfo.getTimeInSamples();
-            }
-            bufferEnd = bufferStart + bufferSize;
-        }
-        else
-        {
-            // advance the position based on the buffer size
-            bufferEnd = bufferStart + bufferSize;
-            timeNs += bufferSize * 1e9 / sampleRate;
-            quarterNotesPerBuffer = bufferSize / (samplesPerBeat * beatsPerQuarterNote);
-            ppq += quarterNotesPerBuffer;
         }
         updatePosition();
+        advancePlayHead();
     }
 
     return info;
@@ -272,14 +258,36 @@ void CustomPlayHead::updatePosition() const
 {
     info.setHostTimeNs(timeNs);
     info.setBpm(tempo);
-    info.setTimeInSamples(bufferStart);
-    info.setTimeInSeconds(bufferStart / sampleRate);
+    info.setTimeInSamples(bufferPos);
+    info.setTimeInSeconds(bufferPos / sampleRate);
     info.setPpqPosition(ppq);
-
-    // after updating the position, advance the buffer start
-    bufferStart = bufferEnd;
+    info.setIsPlaying(isPlaying);
 
     // report the ppq position
     transportParams.setPpq(ppq); // not using a cached value for ppq as it triggers a listener chain which can cause concurrent access errors on the listener list
     transportParams.setPos(ppq);
+}
+
+/*
+* Advance the playhead position based on the buffer size and host transport information
+*/
+void CustomPlayHead::advancePlayHead() const
+{
+    if (*transportParams.host_controls_playing && processor.getPlayHead()->getPosition().hasValue())
+    {
+        // Only advance if host is controlling position but time in samples is not available
+        if (*transportParams.host_controls_position && !processor.getPlayHead()->getPosition()->getTimeInSamples().hasValue())
+        {
+            bufferPos += bufferSize;
+            ppq = bufferPos / (samplesPerBeat * beatsPerQuarterNote);
+            timeNs = (bufferPos / sampleRate) * 1e9;
+        }
+    }
+    else
+    {
+        // Standalone or internal transport
+        bufferPos += bufferSize;
+        ppq = bufferPos / (samplesPerBeat * beatsPerQuarterNote);
+        timeNs = (bufferPos / sampleRate) * 1e9;
+    }
 }

@@ -43,8 +43,7 @@ private:
     // internal transport info - represents the current state of the playhead
     bool isPlaying = false;
     mutable double ppq = 0.0;
-    mutable uint64_t bufferEnd = 0;
-    mutable uint64_t bufferStart = 0;
+    mutable uint64_t bufferPos = 0;
     double sampleRate = 48000.0;
     mutable double tempo = 120.0;
     float tempoSpeed = 0.25f; // what fraction to use for the tempo relative note duration (0.25 = quarter note, 0.5 = half note, etc.)
@@ -70,6 +69,7 @@ private:
 
     juce::Optional<PositionInfo> getPosition() const override;
 
+    void advancePlayHead() const;
     void changePosition() const;
     void updatePosition() const;
 
