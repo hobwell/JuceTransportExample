@@ -35,6 +35,7 @@ void TransportParameters::attachToState(juce::ValueTree& state, juce::UndoManage
     pos_beat = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::pos_beat, undoManager, 1.f);
     pos_div = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::pos_div, undoManager, 1.f);
     sample_rate = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::sample_rate, undoManager, 48000.f);
+    samples_per_beat= std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::samples_per_beat, undoManager, 48000.f);
     tempo = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::tempo, undoManager, 120.f);
     tempo_speed = std::make_unique<juce::CachedValue<float>>(state, TRANSPORT::IDS::tempo_speed, undoManager, 0.25f);
 }
@@ -62,7 +63,9 @@ std::unique_ptr<juce::AudioProcessorParameterGroup>  TransportParameters::create
     group->addChild (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::pos_beat, 1}, TRANSPORT::LABELS::pos_beat, 1.f, 99.f, 1.f));
     group->addChild (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::pos_div, 1}, TRANSPORT::LABELS::pos_div, 1.f, 256.f, 1.f));
     group->addChild (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::ppq, 1}, TRANSPORT::LABELS::ppq, -99999.f, 99999.f, 0)); // 27+hrs at 60bpm, 13+hrs @ 120bpm etc.
+    group->addChild (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::sample_pos, 1}, TRANSPORT::LABELS::sample_pos, std::numeric_limits<float>::min(), std::numeric_limits<float>::max(), 0.f));
     group->addChild (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::sample_rate, 1}, TRANSPORT::LABELS::sample_rate, 0.f, 384000.f, 48000.f));
+    group->addChild (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID {TRANSPORT::IDS::samples_per_beat, 1}, TRANSPORT::LABELS::samples_per_beat, 0.f, 92160000.f, 48000.f));
 
     // need to specify the step size for the tempo so that it can be exact
     juce::NormalisableRange<float> tempoSteppedRange(1.00, 999.0f, 0.01f);
@@ -90,12 +93,22 @@ float TransportParameters::getPpq()
     return *apvts.getRawParameterValue(TRANSPORT::IDS::ppq);
 }
 
+double TransportParameters::getSamplePosition()
+{
+    return *apvts.getRawParameterValue(TRANSPORT::IDS::sample_pos);
+}
+
 void TransportParameters::setPpq(float ppq)
 {
     apvts.getRawParameterValue(TRANSPORT::IDS::ppq)->store(ppq);
 }
 
-void TransportParameters::setPos(float ppq, bool forceUpdate)
+void TransportParameters::setSamplePosition(double pos)
+{
+    apvts.getRawParameterValue(TRANSPORT::IDS::sample_pos)->store(pos);
+}
+
+void TransportParameters::setBarBeatDivPos(float ppq, bool forceUpdate)
 {
     // Calculate the number of subdivisions per beat based on beat_duration
     int subDivisionsPerBeat = 16 / *beat_duration;  // This adjusts based on beat duration

@@ -33,7 +33,7 @@ CustomPlayHead::CustomPlayHead(juce::AudioProcessor& proc, double sampleRateIn, 
 
     // check if the host is a standalone app
     isStandalone = juce::JUCEApplicationBase::isStandaloneApp();
-    recalculate();
+    recalculate(transportParams);
     updatePosition();
 }
 
@@ -112,12 +112,13 @@ juce::Optional<juce::AudioPlayHead::PositionInfo> CustomPlayHead::getPosition(in
 /*
 * Recalculate time domain values
 */
-void CustomPlayHead::recalculate() const
+void CustomPlayHead::recalculate(TransportParameters& params) const
 {
     beatsPerQuarterNote = 0.25f / tempoSpeed;
     secondsPerBeat = 60.f / tempo;
     samplesPerBeat = sampleRate * secondsPerBeat;
     needsUpdate = false;
+    *params.samples_per_beat = samplesPerBeat;
 }
 
 /*
@@ -247,7 +248,7 @@ void CustomPlayHead::synchronizeState()
 
     if (needsUpdate)
     {
-        recalculate();
+        recalculate(transportParams);
     }
 }
 
@@ -263,9 +264,10 @@ void CustomPlayHead::updatePosition() const
     info.setPpqPosition(ppq);
     info.setIsPlaying(isPlaying);
 
-    // report the ppq position
+    // report positions
+    transportParams.setSamplePosition(bufferPos);
     transportParams.setPpq(ppq); // not using a cached value for ppq as it triggers a listener chain which can cause concurrent access errors on the listener list
-    transportParams.setPos(ppq);
+    transportParams.setBarBeatDivPos(ppq);
 }
 
 /*
@@ -279,7 +281,8 @@ void CustomPlayHead::advancePlayHead() const
         if (*transportParams.host_controls_position && !processor.getPlayHead()->getPosition()->getTimeInSamples().hasValue())
         {
             bufferPos += bufferSize;
-            ppq = bufferPos / (samplesPerBeat * beatsPerQuarterNote);
+            double beatsAdvanced = static_cast<double>(bufferSize) / samplesPerBeat;
+            ppq += beatsAdvanced * beatsPerQuarterNote;
             timeNs = (bufferPos / sampleRate) * 1e9;
         }
     }
@@ -287,7 +290,8 @@ void CustomPlayHead::advancePlayHead() const
     {
         // Standalone or internal transport
         bufferPos += bufferSize;
-        ppq = bufferPos / (samplesPerBeat * beatsPerQuarterNote);
+        double beatsAdvanced = static_cast<double>(bufferSize) / samplesPerBeat;
+        ppq += beatsAdvanced * beatsPerQuarterNote;
         timeNs = (bufferPos / sampleRate) * 1e9;
     }
 }

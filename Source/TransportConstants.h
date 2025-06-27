@@ -59,7 +59,9 @@ namespace TRANSPORT
         const juce::String pos_div ("pos_div");
         const juce::String ppq ("ppq");
         const juce::String reposition_flag ("reposition_flag");
+        const juce::String sample_pos ("sample_pos");
         const juce::String sample_rate ("sample_rate");
+        const juce::String samples_per_beat ("samples_per_beat");
         const juce::String tempo ("tempo");
         const juce::String tempo_speed ("tempo_speed"); // tempo speed refers to the relative note duration (e.g. tempo speed = q to indicate time relative to quarter notes)
         const juce::String time_sig_controls_tempo_speed ("time_sig_controls_tempo_speed");
@@ -86,7 +88,9 @@ namespace TRANSPORT
         const juce::String pos_div ("POS Div");
         const juce::String ppq ("PPQ");
         const juce::String reposition_flag ("Reposition Flag");
+        const juce::String sample_pos ("Sample Position");
         const juce::String sample_rate ("Sample Rate");
+        const juce::String samples_per_beat ("Samples Per Beat");
         const juce::String tempo ("Tempo");
         const juce::String tempo_speed ("Tempo Duration");
         const juce::String time_sig_controls_tempo_speed("Time Signature Controls Tempo Note Duration");

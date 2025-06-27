@@ -73,7 +73,7 @@ private:
     void changePosition() const;
     void updatePosition() const;
 
-    void recalculate() const;
+    void recalculate(TransportParameters& params) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CustomPlayHead);
 };

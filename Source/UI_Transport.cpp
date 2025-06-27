@@ -94,14 +94,14 @@ UI_Transport::UI_Transport(TransportParameters& transportParams) :
                     // update the position when the beat duration is changed
                     ppq = transportParams.getPpq();
                     transportTimeline.setTransportPosition(ppq);
-                    transportParams.setPos(ppq, true);
+                    transportParams.setBarBeatDivPos(ppq, true);
                 };
             spinBeatLength.onUserEditComplete = [&, f]
                 {
                     // update the position when the beat duration is changed
                     ppq = transportParams.getPpq();
                     transportTimeline.setTransportPosition(ppq);
-                    transportParams.setPos(ppq, true);
+                    transportParams.setBarBeatDivPos(ppq, true);
                 };
         }
     );

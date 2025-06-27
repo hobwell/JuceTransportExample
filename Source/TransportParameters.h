@@ -38,8 +38,9 @@ struct TransportParameters :
     std::unique_ptr<juce::CachedValue<bool>> playing;
     std::unique_ptr<juce::CachedValue<bool>> reposition_flag;
 
-    // ppq is not a good candidate for a cached value, as it is frequently updated
+    // positions are not good candidates for cached values, as they are frequently updated
     // juce::CachedValue<float> ppq{ apvts.state, TRANSPORT::IDS::ppq, undoManager, 0.f };
+    // juce::CachedValue<float> sample_pos{ apvts.state, TRANSPORT::IDS::sample_pos, undoManager, 0.f };
 
     // pos_* are not good candidates for cached values, as they are frequently updated
     std::unique_ptr<juce::CachedValue<float>> pos_bar;
@@ -47,14 +48,17 @@ struct TransportParameters :
     std::unique_ptr<juce::CachedValue<float>> pos_div;
 
     std::unique_ptr<juce::CachedValue<float>> sample_rate;
+    std::unique_ptr<juce::CachedValue<float>> samples_per_beat;
     std::unique_ptr<juce::CachedValue<float>> tempo;
     std::unique_ptr<juce::CachedValue<float>> tempo_speed;  // what the tempo is relative to (e.g. 1/4 is a quarter note, 1/8 is an eighth note, etc.)
 
     static std::unique_ptr<juce::AudioProcessorParameterGroup>  createParameters();
 
     float getPpq();
+    double getSamplePosition();
     void setPpq(float ppq);
-    void setPos(float ppq, bool forceUpdate = false);
+    void setSamplePosition(double pos);
+    void setBarBeatDivPos(float ppq, bool forceUpdate = false);
 
 private:
 
