@@ -51,7 +51,13 @@ void ParameterGroup::flushPendingUpdates()
     }
 
     for (auto& [paramId, updater] : updatesToApply)
-        updater(); // safely call them OUTSIDE the lock
+    {
+        // safely call the updater on the message thread
+        updateOnMessageThread([updater]
+            {
+                updater(); // safely call them OUTSIDE the lock
+            });
+    }
 }
 
 void ParameterGroup::timerCallback()

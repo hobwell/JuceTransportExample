@@ -38,6 +38,19 @@ struct ParameterGroup :
     void timerCallback() override;
     void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
+    template <typename Func>
+    void updateOnMessageThread(Func&& func) const
+    {
+        if (juce::MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            func();
+        }
+        else
+        {
+            juce::MessageManager::callAsync([f = std::forward<Func>(func)] { f(); });
+        }
+    }
+
     template <typename TypeName>
     void updateParameter(const juce::String& paramId, TypeName value, bool forceUpdate = false) const
     {
