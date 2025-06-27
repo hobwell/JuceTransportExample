@@ -118,7 +118,7 @@ void CustomPlayHead::recalculate(TransportParameters& params) const
     secondsPerBeat = 60.f / tempo;
     samplesPerBeat = sampleRate * secondsPerBeat;
     needsUpdate = false;
-    *params.samples_per_beat = samplesPerBeat;
+    params.updateParameter(TRANSPORT::IDS::samples_per_beat, samplesPerBeat);
 }
 
 /*
